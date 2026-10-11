@@ -38,9 +38,11 @@ Oltre a colori e font, il tema `italia` riprende l'impaginazione del Design Syst
 
 - intestazione a tre fasce (`components/themes/italia/Header.tsx`): fascia sottile `--it-color-blue-20` con l'editore, fascia blu primaria con nome e sottotitolo del portale, barra di navigazione;
 - piè di pagina a due fasce (`components/themes/italia/Footer.tsx`): blu primario con nome, catalogo (dataset e feed DCAT) ed editore, `--it-color-blue-20` con «Realizzato con PortalJS»;
-- pagine su un contenitore di 1320px e dataset a card in griglia nella ricerca (regole in `styles/themes/italia.css`).
+- pagine su un contenitore di 1320px e dataset a card in griglia nella ricerca (regole in `styles/themes/italia.css`);
+- bottone di download blu primario invece che nero, e tabelle di dati come in Bootstrap Italia: intestazione senza sfondo, titoli di colonna in grassetto normale, bordi `--it-color-border-subtle`;
+- colori della mappa da `lib/theme.ts` (MapLibre vuole valori espliciti, non variabili CSS): dati in blu `--it-color-blue-40`, risultati delle query in arancione `--it-color-orange-40`, sfondo `--it-color-background-muted`. Il tema `editoriale` tiene terracotta, blu e crema del template.
 
-Editore e contatto vengono da `dcat.config.json`, la stessa fonte del catalogo DCAT. Intestazione e piè di pagina si scelgono in base al tema in `components/themes/index.tsx`: il tema `editoriale` tiene la `Navbar` del template e non ha piè di pagina. Le regole di impaginazione si agganciano ad attributi `data-ui` (`page`, `dataset-list`, `dataset-card`, `dataset-title`) messi nelle pagine del template, che il tema `editoriale` ignora.
+Editore e contatto vengono da `dcat.config.json`, la stessa fonte del catalogo DCAT. Intestazione e piè di pagina si scelgono in base al tema in `components/themes/index.tsx`: il tema `editoriale` tiene la `Navbar` del template e non ha piè di pagina. Le regole di impaginazione si agganciano ad attributi `data-ui` (`page`, `dataset-list`, `dataset-card`, `dataset-title`, `primary-action`, `table`) messi nelle pagine del template, che il tema `editoriale` ignora.
 
 # Provare e scegliere un tema
 
@@ -54,7 +56,6 @@ Con `editoriale` il sito è identico a prima dell'introduzione dei temi: il 2026
 
 # Limiti
 
-- I colori della mappa (`components/MapPreview.tsx`) sono scritti nel codice e restano terracotta anche con il tema `italia`.
 - I box d'errore restano rossi e i colori delle differenze riga per riga restano fissi, in tutti i temi.
 
 # Aggiungere un tema

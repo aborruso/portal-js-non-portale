@@ -687,7 +687,7 @@ function ResourceSchema({ resource }: { resource: Resource }) {
     <div className="mt-6">
       <SectionLabel>{t('schema.title')}</SectionLabel>
       <div className="overflow-x-auto border border-ink/[0.18]">
-        <table className="min-w-full border-collapse text-sm">
+        <table data-ui="table" className="min-w-full border-collapse text-sm">
           <thead>
             <tr className="bg-cream-panel text-left font-sans text-[11px] uppercase tracking-[0.06em] text-ink/60">
               <th className="px-4 py-3 font-semibold">{t('schema.field')}</th>

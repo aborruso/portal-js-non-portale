@@ -140,7 +140,7 @@ export default function DataExplorer({ resource }: { resource: Resource }) {
         ) : (
           <>
             <div className="overflow-x-auto border border-ink/[0.18]">
-              <table className="min-w-full border-collapse text-sm">
+              <table data-ui="table" className="min-w-full border-collapse text-sm">
                 <thead>
                   <tr>
                     {columns.map((c) => (
