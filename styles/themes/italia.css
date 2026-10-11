@@ -11,3 +11,43 @@
   --theme-font-sans: var(--it-font-sans), Geneva, Tahoma, sans-serif;
   --theme-font-mono: var(--it-font-mono), ui-monospace, monospace;
 }
+
+/* Layout. Pages, the dataset list and its rows carry data-ui hooks; the «editoriale»
+   theme ignores them. Sizes follow italia/italia-tailwind-ui: 1320px container with
+   16px gutters, cards with a thin border, a light shadow and a big linked title. */
+[data-theme='italia'] [data-ui='page'] {
+  max-width: 1320px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+[data-theme='italia'] [data-ui='dataset-list'] {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  padding-top: 24px;
+}
+[data-theme='italia'] [data-ui='dataset-card'] {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid color-mix(in oklab, var(--theme-ink) 20%, transparent);
+  background-color: var(--it-color-white);
+  box-shadow: 0 4px 4px rgb(0 0 0 / 0.05);
+}
+[data-theme='italia'] [data-ui='dataset-card'] > * {
+  align-self: flex-start;
+  margin-left: 0;
+}
+[data-theme='italia'] [data-ui='dataset-title'] {
+  color: var(--theme-accent);
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+[data-theme='italia'] [data-ui='page'] form[role='search'] {
+  max-width: 760px;
+}

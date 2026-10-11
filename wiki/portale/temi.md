@@ -32,6 +32,16 @@ Il tema si sceglie al momento della build con `NEXT_PUBLIC_THEME` in `next.confi
 
 Il tema `italia` non copia i valori a mano: usa le variabili `--it-*` del pacchetto npm `design-tokens-italia` (1.3.3, licenza BSD-3), i token ufficiali del Design System Italia.[^tokens] Corrispondenze: sfondo `--it-color-white`, pannelli `--it-color-background-muted`, editor `--it-color-gray-98`, testo `--it-color-text-base`, accento `--it-color-background-primary`, font `--it-font-serif/sans/mono`.
 
+# Impaginazione del tema italia
+
+Oltre a colori e font, il tema `italia` riprende l'impaginazione del Design System Italia, con struttura e misure prese da [`italia/italia-tailwind-ui`](https://github.com/italia/italia-tailwind-ui) (la versione Tailwind 4 del Dev Kit Italia, di cui qui si riusano solo le misure):
+
+- intestazione a tre fasce (`components/themes/italia/Header.tsx`): fascia sottile `--it-color-blue-20` con l'editore, fascia blu primaria con nome e sottotitolo del portale, barra di navigazione;
+- piè di pagina a due fasce (`components/themes/italia/Footer.tsx`): blu primario con nome, catalogo (dataset e feed DCAT) ed editore, `--it-color-blue-20` con «Realizzato con PortalJS»;
+- pagine su un contenitore di 1320px e dataset a card in griglia nella ricerca (regole in `styles/themes/italia.css`).
+
+Editore e contatto vengono da `dcat.config.json`, la stessa fonte del catalogo DCAT. Intestazione e piè di pagina si scelgono in base al tema in `components/themes/index.tsx`: il tema `editoriale` tiene la `Navbar` del template e non ha piè di pagina. Le regole di impaginazione si agganciano ad attributi `data-ui` (`page`, `dataset-list`, `dataset-card`, `dataset-title`) messi nelle pagine del template, che il tema `editoriale` ignora.
+
 # Provare e scegliere un tema
 
 ```bash
@@ -40,7 +50,7 @@ NEXT_PUBLIC_THEME=editoriale npm run build   # anteprima di un altro tema, senza
 
 Il tema attivo è il valore predefinito in `next.config.js` (`process.env.NEXT_PUBLIC_THEME || 'italia'`); dal 2026-10-12 è `italia`.
 
-Con `editoriale` il sito è identico a prima dell'introduzione dei temi: il 2026-10-11 home, ricerca, scheda dataset e scheda con mappa sono state confrontate pixel per pixel, senza differenze.
+Con `editoriale` il sito è identico a prima dell'introduzione dei temi: il 2026-10-12, anche dopo l'impaginazione del tema italia, home, ricerca, scheda dataset e scheda con mappa sono state confrontate pixel per pixel, senza differenze.
 
 # Limiti
 
@@ -52,6 +62,7 @@ Con `editoriale` il sito è identico a prima dell'introduzione dei temi: il 2026
 1. `styles/themes/<tema>.css` con le 8 variabili `--theme-*` sotto `[data-theme='<tema>']`.
 2. Un `@import` in `styles/globals.css`.
 3. Una voce in `THEMES` in `lib/theme.ts`, con il foglio Google Fonts e il `theme-color`.
+4. Se serve, intestazione e piè di pagina propri in `components/themes/<tema>/`, scelti in `components/themes/index.tsx`.
 
 [^theme]: Elenco dei temi, font e theme-color
 [^css]: Variabili CSS di ogni tema
