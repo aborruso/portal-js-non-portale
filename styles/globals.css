@@ -1,3 +1,9 @@
+/* Graphic themes (see lib/theme.ts). design-tokens-italia provides the --it-*
+   variables the «italia» theme maps onto. */
+@import 'design-tokens-italia/dist/css/variables.css';
+@import './themes/editoriale.css';
+@import './themes/italia.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,7 +18,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
   body {
-    background-color: oklch(0.97 0.012 75);
-    font-family: 'Work Sans', system-ui, sans-serif;
+    background-color: var(--theme-cream);
+    font-family: var(--theme-font-sans);
   }
 }

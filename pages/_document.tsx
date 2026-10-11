@@ -1,9 +1,10 @@
 import { Html, Head, Main, NextScript } from 'next/document'
 import { LOCALE, t } from '../lib/i18n'
+import { THEME, themeConfig } from '../lib/theme'
 
 export default function Document() {
   return (
-    <Html lang={LOCALE}>
+    <Html lang={LOCALE} data-theme={THEME}>
       <Head>
         {/* Default PortalJS branding — PLACEHOLDER. Replace the files in `public/`
             (favicon.ico, icon.svg, apple-touch-icon.png, icon-512.png) with your
@@ -12,7 +13,7 @@ export default function Document() {
         <link rel="icon" type="image/svg+xml" href="/portaljs/icon.svg" />
         <link rel="apple-touch-icon" href="/portaljs/apple-touch-icon.png" />
         <meta name="description" content="Demo di PortalJS sul VPS" />
-        <meta name="theme-color" content="#f6f2e9" />
+        <meta name="theme-color" content={themeConfig.themeColor} />
         {/* DCAT feed autodiscovery — lets national/EU/US open-data portals (and
             harvesters like data.europa.eu) find this catalog's machine-readable
             metadata. /catalog.jsonld is the stable canonical feed, regenerated at
@@ -35,7 +36,7 @@ export default function Document() {
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Work+Sans:wght@400;500;600&display=swap"
+          href={themeConfig.fonts}
           rel="stylesheet"
         />
       </Head>
