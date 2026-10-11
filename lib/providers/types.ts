@@ -130,6 +130,8 @@ export type Dataset = {
   // Optional: absent for datasets whose count wasn't captured.
   recordCount?: number
   version?: string
+  // Charts shown in the showcase Views section (lib/views.ts).
+  views?: import('../views').DatasetView[]
 }
 
 // A discovery query against the catalog. The static provider filters in memory;
