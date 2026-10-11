@@ -62,6 +62,7 @@ Nei dataset di esempio il titolare è la fonte: ISO per Country Codes, Natural E
 - editore e titolare come `dcatapit:Agent`, con `dct:identifier` e `foaf:name`;
 - il punto di contatto come `dcatapit:Organization` sui dataset;
 - `dct:rightsHolder` e `dct:accrualPeriodicity` su ogni dataset, la licenza su ogni distribuzione;
+- i temi come nodi `skos:Concept`: senza, il validatore online AgID dà un avviso in più (regola 167, sospesa nel repository pubblico delle regole ma applicata dal servizio);
 - un IRI del dataset distinto dalla sua pagina (`…/<dataset>#dataset`), perché per AgID la pagina (`dcat:landingPage`) deve essere un semplice documento.
 
 Se manca un campo obbligatorio, la build lo segnala (regole `dcat-ap-it` in `lib/metadata/dcat-validate.ts`).

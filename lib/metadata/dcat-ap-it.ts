@@ -98,6 +98,13 @@ export const dcatApItProfile: DcatProfile = {
       const holder = agentNode(ov.rightsHolder)
       if (holder) ds['dct:rightsHolder'] = holder
       if (ov.accrualPeriodicity) ds['dct:accrualPeriodicity'] = ov.accrualPeriodicity
+      // Themes are skos:Concept nodes in DCAT-AP_IT (the AgID validator warns when the
+      // feed has no skos:Concept at all).
+      if (ds['dcat:theme']) {
+        ds['dcat:theme'] = ([] as unknown[])
+          .concat(ds['dcat:theme'])
+          .map((t) => (typeof t === 'string' ? { '@id': t, '@type': 'skos:Concept' } : t))
+      }
       const license = licenseNode(ds['dct:license'])
       ds['dcat:distribution'] = ((ds['dcat:distribution'] ?? []) as JsonLdNode[]).map((d) => {
         const dist = withType(d, 'dcatapit:Distribution')
