@@ -1,6 +1,7 @@
 # Registro degli aggiornamenti del wiki
 
 ## 2026-10-12
+* **Creazione**: documentati i [grafici dei dataset](portale/grafici.md), con il primo grafico su CO₂ Emissions per Capita.
 * **Modifica**: il tema grafico attivo diventa `italia` ([temi grafici](portale/temi.md)).
 
 ## 2026-10-11

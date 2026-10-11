@@ -98,7 +98,23 @@
       "themes": ["http://publications.europa.eu/resource/authority/data-theme/ENVI"],
       "rightsHolder": { "name": "Datopian", "identifier": "datopian.com", "homepage": "https://www.datopian.com/" },
       "accrualPeriodicity": "http://publications.europa.eu/resource/authority/frequency/UNKNOWN"
-    }
+    },
+    "schema": {
+      "fields": [
+        { "name": "country", "type": "string", "title": "Country" },
+        { "name": "tonnes_per_capita", "type": "number", "title": "CO₂ per capita (tonnes)" },
+        { "name": "year", "type": "integer", "title": "Year" }
+      ]
+    },
+    "views": [
+      {
+        "name": "co2-by-country",
+        "title": "Tonnellate di CO₂ pro capite per paese (2022)",
+        "resources": [0],
+        "specType": "simple",
+        "spec": { "type": "bar", "group": "country", "series": ["tonnes_per_capita"] }
+      }
+    ]
   },
   {
     "slug": "country-indicators",

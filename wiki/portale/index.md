@@ -5,3 +5,4 @@
 * [Lingua dell'interfaccia](lingua.md) - Testi dell'interfaccia in file per lingua (locales/), scelta della lingua in next.config.js, funzione t(); come aggiungere una lingua e portare il meccanismo in un altro repository.
 * [Catalogo DCAT](dcat.md) - Feed DCAT 3 e DCAT-AP_IT del portale: dove sono, da dove prendono i metadati, come si controllano con le regole AgID e il validatore UE.
 * [Temi grafici](temi.md) - Temi dell'interfaccia scelti da configurazione: editoriale (quello del template) e italia (attivo, design token ufficiali del Design System Italia).
+* [Grafici dei dataset](grafici.md) - Grafici nella sezione Viste della scheda dataset, dichiarati in datasets.json con la specifica Frictionless Data Package Views (simple: line, bar).

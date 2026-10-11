@@ -17,6 +17,7 @@ import {
 import { provider } from '../../lib/providers'
 import { withHistory } from '../../lib/history'
 import { formatDate } from '../../lib/format'
+import { isSimpleChart } from '../../lib/views'
 import { formatNumber, t, tn } from '../../lib/i18n'
 
 // DuckDB only runs in the browser, so load the query view client-side. The chunk
@@ -32,6 +33,11 @@ const DataExplorer = dynamic(() => import('../../components/DataExplorer'), {
 // PMTiles render layer AND the GeoParquet + DuckDB-Wasm query engine bound to the
 // same map viewport — a dual-tier dataset gets one map, not two.
 const MapPreview = dynamic(() => import('../../components/MapPreview'), {
+  ssr: false,
+})
+
+// Charts declared in datasets.json (`views`, see lib/views.ts); client-only.
+const DatasetViews = dynamic(() => import('../../components/DatasetViews'), {
   ssr: false,
 })
 
@@ -188,14 +194,18 @@ export default function DatasetPage({ dataset, resources, activity }: PageProps)
             {/* Views placeholder — charts and maps are added here by the
                 /portaljs-add-chart and /portaljs-add-map skills. */}
             <SectionLabel className="mt-11">{t('dataset.views')}</SectionLabel>
-            <div className="border border-ink/[0.15] p-11 text-center">
-              <div className="mb-2 font-serif text-[17px] italic text-ink/55">
-                {t('dataset.noViews')}
+            {dataset.views?.some(isSimpleChart) ? (
+              <DatasetViews views={dataset.views} resources={resources} />
+            ) : (
+              <div className="border border-ink/[0.15] p-11 text-center">
+                <div className="mb-2 font-serif text-[17px] italic text-ink/55">
+                  {t('dataset.noViews')}
+                </div>
+                <div className="font-sans text-xs text-ink/40">
+                  {t('dataset.viewsHint')}
+                </div>
               </div>
-              <div className="font-sans text-xs text-ink/40">
-                {t('dataset.viewsHint')}
-              </div>
-            </div>
+            )}
 
             {/* Sources & license — Data Package descriptor fields. */}
             {((dataset.licenses && dataset.licenses.length > 0) ||
