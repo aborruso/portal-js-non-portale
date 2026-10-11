@@ -71,6 +71,8 @@ export type FrictionlessLike = PackageMetadata & {
   file?: string
   format?: string
   schema?: TableSchema
+  // Multi-file datasets carry their files here instead of `file`/`format`.
+  resources?: { name?: string; title?: string; path: string; format?: string }[]
 }
 
 // A catalog entry adds the routing identity (namespace/slug) the catalog uses to
@@ -224,6 +226,22 @@ export function toDCAT(input: FrictionlessLike, opts: ToDcatOptions = {}): DcatD
       } as DcatDistribution)
     : undefined
 
+  // Multi-file datasets: one distribution per resource. A remote path (R2/LFS URL) is
+  // already absolute; a bundled file lives under data/.
+  const resourceDistributions: DcatDistribution[] = input.file
+    ? []
+    : (input.resources ?? []).map((r) => {
+        const url = /^https?:\/\//.test(r.path) ? r.path : joinUrl(opts.baseUrl, `data/${r.path}`)
+        return compact({
+          '@type': 'dcat:Distribution',
+          'dct:title': r.title ?? r.name,
+          'dcat:downloadURL': url,
+          'dcat:accessURL': landingPage ?? url,
+          'dct:format': formatIri(r.format),
+          'dcat:mediaType': mediaTypeIri(r.format),
+        } as DcatDistribution)
+      })
+
   return compact({
     '@id': landingPage ?? (opts.identifier ? joinUrl(opts.baseUrl, opts.identifier) : undefined),
     '@type': 'dcat:Dataset',
@@ -239,7 +257,7 @@ export function toDCAT(input: FrictionlessLike, opts: ToDcatOptions = {}): DcatD
     'dct:modified': input.modified,
     'dcat:version': input.version,
     'dcat:landingPage': landingPage,
-    'dcat:distribution': distribution ? [distribution] : undefined,
+    'dcat:distribution': distribution ? [distribution] : resourceDistributions,
   } as DcatDataset)
 }
 

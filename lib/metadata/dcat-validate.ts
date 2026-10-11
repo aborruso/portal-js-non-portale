@@ -28,6 +28,12 @@ const CATALOG_RULES: Record<string, Rule[]> = {
     { path: 'dct:description', label: 'catalog description', level: 'error' },
     { path: 'dct:publisher', label: 'catalog publisher (dct:publisher)', level: 'error' },
   ],
+  'dcat-ap-it': [
+    { path: 'dct:title', label: 'catalog title', level: 'error' },
+    { path: 'dct:description', label: 'catalog description', level: 'error' },
+    { path: 'dct:publisher', label: 'catalog publisher (dct:publisher, name + identifier)', level: 'error' },
+    { path: 'dct:modified', label: 'catalog modified date', level: 'error' },
+  ],
   // Croissant is schema.org-shaped (sc:DataCatalog): name/description, not dct:title.
   // The authoritative gate is mlcroissant — this catches the high-signal gaps only.
   croissant: [
@@ -53,6 +59,17 @@ const DATASET_RULES: Record<string, Rule[]> = {
     { path: 'dcat:contactPoint', label: 'contact point (fn + hasEmail)', level: 'error' },
     { path: 'dct:accessLevel', label: 'access level (dct:accessLevel)', level: 'error' },
     { path: 'dct:identifier', label: 'identifier', level: 'warning' },
+  ],
+  // DCAT-AP_IT mandatory dataset properties (AgID guidelines, table 1.3.2).
+  'dcat-ap-it': [
+    { path: 'dct:identifier', label: 'identifier', level: 'error' },
+    { path: 'dct:title', label: 'title', level: 'error' },
+    { path: 'dct:description', label: 'description', level: 'error' },
+    { path: 'dct:modified', label: 'modified date (manifest `modified`)', level: 'error' },
+    { path: 'dcat:theme', label: 'theme (dcat.themes, EU data-theme vocab)', level: 'error' },
+    { path: 'dct:rightsHolder', label: 'rights holder (dcat.rightsHolder, name + identifier)', level: 'error' },
+    { path: 'dct:accrualPeriodicity', label: 'accrual periodicity (dcat.accrualPeriodicity, EU frequency vocab)', level: 'error' },
+    { path: 'dcat:distribution', label: 'distribution', level: 'error' },
   ],
   // Croissant datasets are schema.org sc:Dataset (name/description/distribution).
   croissant: [

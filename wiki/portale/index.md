@@ -3,3 +3,4 @@
 * [Panoramica](panoramica.md) - Il portale PortalJS su https://srv2031803.hstgr.cloud/portaljs/: pagine, versione del template, perché sta sotto /portaljs/.
 * [Dati](dati.md) - I sette dataset di esempio del template, dove stanno i file e cosa il browser scarica da siti esterni.
 * [Lingua dell'interfaccia](lingua.md) - Testi dell'interfaccia in file per lingua (locales/), scelta della lingua in next.config.js, funzione t(); come aggiungere una lingua e portare il meccanismo in un altro repository.
+* [Catalogo DCAT](dcat.md) - Feed DCAT 3 e DCAT-AP_IT del portale: dove sono, da dove prendono i metadati, come si controllano con le regole AgID e il validatore UE.
