@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import DebouncedInput from '../components/ui/DebouncedInput'
-import { datasetHref, getResources, type Dataset } from '../lib/datasets'
+import { NAMESPACE_TYPE, datasetHref, getResources, type Dataset } from '../lib/datasets'
 import { provider } from '../lib/providers'
 import { formatNumber, t, tn } from '../lib/i18n'
 
@@ -171,7 +171,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
                 )}
                 {nsFacets && (
                   <FacetGroup
-                    title={t('search.publishers')}
+                    title={NAMESPACE_TYPE === 'owner' ? t('search.publishers') : t('search.themes')}
                     options={nsFacets}
                     active={activeNs}
                     onToggle={(v) => toggle(activeNs, v, setActiveNs)}
