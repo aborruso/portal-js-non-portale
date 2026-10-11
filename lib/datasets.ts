@@ -67,7 +67,7 @@ export function getResources(d: Dataset): Resource[] {
 // copying bytes into the repo.
 export function resourceUrl(r: Resource): string {
   if (/^(https?:)?\/\//.test(r.path) || r.path.startsWith('/')) return r.path
-  return `/data/${r.path}`
+  return `/portaljs/data/${r.path}`
 }
 
 // Human-readable label for a resource in the file list. `path` can be an R2/LFS

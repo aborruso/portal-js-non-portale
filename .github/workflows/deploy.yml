@@ -1,0 +1,58 @@
+# A ogni push su main: build statica e copia in /srv/portaljs sul VPS,
+# servita da Caddy su https://srv2031803.hstgr.cloud/portaljs/
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Un deploy alla volta; se ne arriva uno nuovo, quello in coda vince
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # SITE_URL: indirizzi assoluti dei file nel feed DCAT
+      - run: npm run build
+        env:
+          SITE_URL: https://srv2031803.hstgr.cloud/portaljs
+
+      # Il sito sta sotto /portaljs/: nessun link o file deve puntare alla radice
+      - name: Controllo dei percorsi
+        run: |
+          if grep -rEoh '(href|src)="/[^/][^"]*"' out --include='*.html' | grep -vE '="/portaljs(/|")' | sort -u | grep .; then
+            echo "Riferimenti fuori da /portaljs/ nelle pagine" >&2
+            exit 1
+          fi
+
+      # La chiave entra solo come portaljs-deploy, che sul VPS può soltanto
+      # scrivere in /srv/portaljs (rrsync). L'impronta del server è nel secret
+      # VPS_KNOWN_HOSTS: niente StrictHostKeyChecking no
+      - name: Copia sul VPS
+        env:
+          SSH_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          rsync -rlt --delete --chmod=D755,F644 \
+            -e "ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes" \
+            out/ portaljs-deploy@179.198.221.95:/

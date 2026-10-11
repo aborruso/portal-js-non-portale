@@ -7,9 +7,9 @@ export default function Document() {
         {/* Default PortalJS branding — PLACEHOLDER. Replace the files in `public/`
             (favicon.ico, icon.svg, apple-touch-icon.png, icon-512.png) with your
             own brand marks; these links can stay as-is once the files are swapped. */}
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" href="/portaljs/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/svg+xml" href="/portaljs/icon.svg" />
+        <link rel="apple-touch-icon" href="/portaljs/apple-touch-icon.png" />
         <meta name="description" content="Demo di PortalJS sul VPS" />
         <meta name="theme-color" content="#f6f2e9" />
         {/* DCAT feed autodiscovery — lets national/EU/US open-data portals (and
@@ -20,7 +20,7 @@ export default function Document() {
         <link
           rel="alternate"
           type="application/ld+json"
-          href="/catalog.jsonld"
+          href="/portaljs/catalog.jsonld"
           title="DCAT catalog feed"
         />
         {/* Editorial type system (Claude Design import): Newsreader (serif),

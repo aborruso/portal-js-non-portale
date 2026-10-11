@@ -1,3 +1,39 @@
+# PortalJS demo
+
+Portale di dati costruito con [PortalJS](https://github.com/datopian/portaljs), pubblicato su https://srv2031803.hstgr.cloud/portaljs/.
+
+## Sviluppare
+
+```bash
+npm install
+npm run dev        # → http://localhost:3000/portaljs
+```
+
+Il sito vive sotto `/portaljs/`, non nella radice: `basePath` in `next.config.js` sistema link e file di Next.js; i percorsi scritti a mano vanno sempre preceduti da `/portaljs` (oggi in `lib/datasets.ts` e `pages/_document.tsx`). Un dataset nuovo è un file in `public/data/` più una voce in `datasets.json` (sotto, «Adding a dataset»). Le skill di Claude Code incluse in `.claude/commands/` funzionano aprendo Claude Code in questa cartella; `/portaljs-add-dataset` di default manda i file grandi su R2 di Datopian, cosa che qui non si vuole.
+
+## Pubblicare
+
+Basta il push su `main`. La GitHub Action `deploy` fa la build, controlla che nessun link punti fuori da `/portaljs/` e copia il sito sul VPS in `/srv/portaljs`. Si può rilanciare a mano dalla scheda Actions. Secret del repository: `VPS_DEPLOY_KEY` (chiave privata, che sul VPS può solo scrivere in `/srv/portaljs`) e `VPS_KNOWN_HOSTS` (impronta ED25519 del server, `SHA256:kLuPU/AWC3LLMUiAXHNgriioXviGsM7IQq6selj6Otw`). Il lato server è in `scripts/setup-portaljs.sh` del repository `aborruso/vps-hostinger`.
+
+## Prendere gli aggiornamenti del template
+
+Questo repository è una copia del template `examples/portaljs-catalog`, non un fork: gli aggiornamenti di PortalJS non arrivano da soli. Il ramo `upstream` contiene il template originale, senza modifiche; `main` è il nostro. Per portare una versione nuova:
+
+```bash
+git switch upstream
+REF=<commit o tag di datopian/portaljs>
+tmp=$(mktemp -d)
+npx -y create-portaljs@latest "$tmp/p" -y --ref "$REF" --name "PortalJS demo" --description "Demo di PortalJS sul VPS" --no-git --no-install
+rsync -a --delete --exclude .git --exclude node_modules --exclude .next --exclude out "$tmp/p/" ./
+git add -A && git commit -m "upstream: template @ $REF"
+git switch main && git merge upstream     # conflitti solo dove abbiamo cambiato le stesse righe
+npm install && npm run build
+```
+
+Il nome e la descrizione vanno passati uguali a quelli usati la prima volta, altrimenti il diff li segnala come modifiche. Versione di partenza: `create-portaljs` 0.6.0, template al commit `d5c096aa6a4c`.
+
+---
+
 # PortalJS Catalog Template (dynamic routes)
 
 A template variant for portals with **many datasets**. Instead of one page file per
