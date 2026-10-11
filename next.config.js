@@ -6,5 +6,7 @@ const nextConfig = {
   output: 'export',
   basePath: '/portaljs',
   images: { unoptimized: true },
+  // Lingua dell'interfaccia: locales/<lingua>.json, vedi lib/i18n.ts
+  env: { NEXT_PUBLIC_LOCALE: 'it' },
 }
 module.exports = nextConfig

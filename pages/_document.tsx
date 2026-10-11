@@ -1,8 +1,9 @@
 import { Html, Head, Main, NextScript } from 'next/document'
+import { LOCALE, t } from '../lib/i18n'
 
 export default function Document() {
   return (
-    <Html lang="en">
+    <Html lang={LOCALE}>
       <Head>
         {/* Default PortalJS branding — PLACEHOLDER. Replace the files in `public/`
             (favicon.ico, icon.svg, apple-touch-icon.png, icon-512.png) with your
@@ -21,7 +22,7 @@ export default function Document() {
           rel="alternate"
           type="application/ld+json"
           href="/portaljs/catalog.jsonld"
-          title="DCAT catalog feed"
+          title={t('meta.catalogFeed')}
         />
         {/* Editorial type system (Claude Design import): Newsreader (serif),
             Work Sans (sans), IBM Plex Mono (SQL editor). Loaded via <link> — no
