@@ -1,0 +1,13 @@
+/* Tema «italia»: i ruoli del portale mappati sui design token ufficiali del
+   Design System Italia (pacchetto design-tokens-italia, variabili --it-*).
+   https://github.com/italia/design-tokens-italia */
+[data-theme='italia'] {
+  --theme-cream: var(--it-color-white);
+  --theme-cream-panel: var(--it-color-background-muted);
+  --theme-cream-code: var(--it-color-gray-98);
+  --theme-ink: var(--it-color-text-base);
+  --theme-accent: var(--it-color-background-primary);
+  --theme-font-serif: var(--it-font-serif), Georgia, serif;
+  --theme-font-sans: var(--it-font-sans), Geneva, Tahoma, sans-serif;
+  --theme-font-mono: var(--it-font-mono), ui-monospace, monospace;
+}

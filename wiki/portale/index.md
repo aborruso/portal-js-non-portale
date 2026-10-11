@@ -4,3 +4,4 @@
 * [Dati](dati.md) - I sette dataset di esempio del template, dove stanno i file e cosa il browser scarica da siti esterni.
 * [Lingua dell'interfaccia](lingua.md) - Testi dell'interfaccia in file per lingua (locales/), scelta della lingua in next.config.js, funzione t(); come aggiungere una lingua e portare il meccanismo in un altro repository.
 * [Catalogo DCAT](dcat.md) - Feed DCAT 3 e DCAT-AP_IT del portale: dove sono, da dove prendono i metadati, come si controllano con le regole AgID e il validatore UE.
+* [Temi grafici](temi.md) - Temi dell'interfaccia scelti da configurazione: editoriale (predefinito, quello del template) e italia (design token ufficiali del Design System Italia).
