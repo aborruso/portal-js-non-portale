@@ -147,5 +147,6 @@
   "error.unknownFunction": "Unknown function or wrong argument types. {detail}",
   "error.syntax": "SQL syntax error. {detail}",
   "error.fetch": "Failed to fetch {url} ({status})",
-  "error.engineClosed": "Query engine is not open"
+  "error.engineClosed": "Query engine is not open",
+  "search.themes": "Themes"
 }
