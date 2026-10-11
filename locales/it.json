@@ -147,5 +147,10 @@
   "error.unknownFunction": "Funzione sconosciuta o argomenti di tipo sbagliato. {detail}",
   "error.syntax": "Errore di sintassi SQL. {detail}",
   "error.fetch": "Impossibile scaricare {url} ({status})",
-  "error.engineClosed": "Il motore di query non è aperto"
+  "error.engineClosed": "Il motore di query non è aperto",
+  "footer.catalog": "Catalogo",
+  "footer.dcatFeed": "Feed DCAT",
+  "footer.dcatApItFeed": "Feed DCAT-AP_IT",
+  "footer.publisher": "Editore",
+  "footer.poweredBy": "Realizzato con"
 }

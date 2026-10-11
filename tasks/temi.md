@@ -20,6 +20,13 @@ Obiettivo: un meccanismo a temi scelto da configurazione, con il tema attuale (`
 ### Fase 3 - Documentazione
 - [x] pagina del wiki sui temi, `log.md`
 
+### Fase 4 - Impaginazione Bootstrap Italia (tema italia)
+- [x] Intestazione PA (componente del tema): fascia sottile con l'editore, fascia blu con nome e sottotitolo del portale, barra di navigazione
+- [x] Piè di pagina (componente del tema): blu-30 sopra (nome, catalogo, editore), blu-20 sotto (realizzato con PortalJS)
+- [x] Scelta di intestazione e piè di pagina in base al tema: `components/themes/`, due righe in `_app.tsx`
+- [x] Agganci `data-ui` in home, ricerca e scheda dataset; in `italia.css` contenitore a 1176/1320px e dataset a card in griglia
+→ verifica: con `editoriale` ancora identico pixel per pixel; screenshot del tema italia
+
 ## Fuori da questo giro
 - Colori della mappa (`MapPreview.tsx`): sono scritti nel codice (terracotta) e restano tali anche col tema italia.
 
@@ -32,3 +39,4 @@ Obiettivo: un meccanismo a temi scelto da configurazione, con il tema attuale (`
 - Con `NEXT_PUBLIC_THEME=italia`: sfondo bianco, accento `#0066CC`, Lora / Titillium Web / Roboto Mono.
 - Opacità dei colori conservata con `color-mix` (i componenti usano molto `text-ink/70`, `border-ink/[0.12]`…).
 - Fuori da questo giro: colori della mappa; "ESEGUI ▶" va a capo nel bottone dell'editor SQL (difetto della traduzione, non del tema).
+- Fase 4 (2026-10-12): intestazione, piè di pagina, pagine a 1320px e card in griglia per il tema italia, con misure da `italia/italia-tailwind-ui`. `editoriale` ancora identico pixel per pixel. Campo di ricerca della home limitato a 760px nel tema italia.
