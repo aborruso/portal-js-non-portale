@@ -284,6 +284,7 @@ export default function DatasetPage({ dataset, resources, activity }: PageProps)
               <div className="border-t border-ink/[0.15] pt-[18px]">
                 <a
                   href={resourceUrl(primary)}
+                  data-ui="primary-action"
                   className="block rounded-sm bg-ink px-3 py-3 text-center font-sans text-xs font-semibold uppercase tracking-[0.06em] text-cream no-underline"
                 >
                   {t('dataset.downloadFormat', { format: primary.format })}
