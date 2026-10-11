@@ -31,7 +31,7 @@ export default function Home({ suggested }: { suggested: string[] }) {
       <Head>
         <title>PortalJS demo</title>
       </Head>
-      <main className="mx-auto max-w-[660px] px-6 pb-24 pt-16 sm:px-16 sm:pt-[104px]">
+      <main data-ui="page" className="mx-auto max-w-[660px] px-6 pb-24 pt-16 sm:px-16 sm:pt-[104px]">
         <div className="mb-6 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-accent">
           {t('home.eyebrow')}
         </div>

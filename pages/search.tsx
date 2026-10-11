@@ -131,6 +131,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
         <title>{`${t('nav.search')} — PortalJS demo`}</title>
       </Head>
       <main
+        data-ui="page"
         className={`mx-auto px-6 pb-24 sm:px-16 ${hasFacets ? 'max-w-[1100px]' : 'max-w-[720px]'}`}
       >
         <nav className="pt-7 font-sans text-[13px] font-medium text-ink/50">
@@ -194,7 +195,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
                   {query ? t('search.noResultsQuery', { query }) : t('search.noResultsFilters')}
                 </div>
               ) : (
-                <div className="pt-2">
+                <div data-ui="dataset-list" className="pt-2">
                   {filtered.map((ds) => (
                     <DatasetRow key={`${ds.namespace}/${ds.slug}`} ds={ds} />
                   ))}
@@ -297,6 +298,7 @@ function DatasetRow({ ds }: { ds: Dataset }) {
   return (
     <Link
       href={datasetHref(ds)}
+      data-ui="dataset-card"
       className="flex items-baseline gap-5 border-b border-ink/[0.12] py-6 no-underline"
     >
       {geo && ds.thumbnail ? (
@@ -313,7 +315,9 @@ function DatasetRow({ ds }: { ds: Dataset }) {
         <ShapeTile ds={ds} />
       )}
       <div className="min-w-0 flex-1">
-        <div className="mb-1 font-serif text-xl font-semibold text-ink">{ds.name}</div>
+        <div data-ui="dataset-title" className="mb-1 font-serif text-xl font-semibold text-ink">
+          {ds.name}
+        </div>
         {ds.description && (
           <div className="font-sans text-sm leading-normal text-ink/60">
             {truncate(ds.description)}

@@ -148,5 +148,10 @@
   "error.syntax": "SQL syntax error. {detail}",
   "error.fetch": "Failed to fetch {url} ({status})",
   "error.engineClosed": "Query engine is not open",
-  "search.themes": "Themes"
+  "search.themes": "Themes",
+  "footer.catalog": "Catalog",
+  "footer.dcatFeed": "DCAT feed",
+  "footer.dcatApItFeed": "DCAT-AP_IT feed",
+  "footer.publisher": "Publisher",
+  "footer.poweredBy": "Built with"
 }
