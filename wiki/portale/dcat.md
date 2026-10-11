@@ -62,7 +62,7 @@ Nei dataset di esempio il titolare è la fonte: ISO per Country Codes, Natural E
 - editore e titolare come `dcatapit:Agent`, con `dct:identifier` e `foaf:name`;
 - il punto di contatto come `dcatapit:Organization` sui dataset;
 - `dct:rightsHolder` e `dct:accrualPeriodicity` su ogni dataset, la licenza su ogni distribuzione;
-- i temi come nodi `skos:Concept`: senza, il validatore online AgID dà un avviso in più (regola 167, sospesa nel repository pubblico delle regole ma applicata dal servizio);
+- i temi come nodi `skos:Concept` con la `skos:prefLabel` italiana ufficiale del vocabolario UE. Senza tipo, il validatore online AgID dà un avviso (regola 167); con il tipo ma senza etichetta, la regola 169 dà un errore per ogni tema. Entrambe sono sospese nel repository pubblico delle regole, e il 2026-10-11 non si sa se il servizio online applichi anche la 169 (chiesto ad AgID). Un tema fuori dal vocabolario UE resta un URI semplice;
 - un IRI del dataset distinto dalla sua pagina (`…/<dataset>#dataset`), perché per AgID la pagina (`dcat:landingPage`) deve essere un semplice documento.
 
 Se manca un campo obbligatorio, la build lo segnala (regole `dcat-ap-it` in `lib/metadata/dcat-validate.ts`).

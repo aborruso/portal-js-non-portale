@@ -29,6 +29,35 @@ type ItOverrides = { rightsHolder?: ItAgent; accrualPeriodicity?: string }
 
 const DCATAPIT = 'http://dati.gov.it/onto/dcatapit#'
 
+// Italian prefLabels of the EU data-theme vocabulary
+// (http://publications.europa.eu/resource/authority/data-theme), the one DCAT-AP_IT
+// mandates for dcat:theme.
+const EU_THEME = 'http://publications.europa.eu/resource/authority/data-theme/'
+const EU_THEME_LABELS: Record<string, string> = {
+  AGRI: 'Agricoltura, pesca, silvicoltura e prodotti alimentari',
+  ECON: 'Economia e finanze',
+  EDUC: 'Istruzione, cultura e sport',
+  ENER: 'Energia',
+  ENVI: 'Ambiente',
+  GOVE: 'Governo e settore pubblico',
+  HEAL: 'Salute',
+  INTR: 'Tematiche internazionali',
+  JUST: 'Giustizia, sistema giuridico e sicurezza pubblica',
+  REGI: 'Regioni e città',
+  SOCI: 'Popolazione e società',
+  TECH: 'Scienza e tecnologia',
+  TRAN: 'Trasporti',
+}
+
+// A theme as skos:Concept with its prefLabel (AgID rules 167 and 169). A theme outside
+// the EU vocabulary has no known label, so it stays a plain IRI rather than an
+// unlabelled concept, which rule 169 would report as an error.
+function themeNode(uri: string): JsonLdNode | string {
+  const label = uri.startsWith(EU_THEME) ? EU_THEME_LABELS[uri.slice(EU_THEME.length)] : undefined
+  if (!label) return uri
+  return { '@id': uri, '@type': 'skos:Concept', 'skos:prefLabel': { '@value': label, '@language': 'it' } }
+}
+
 // A dcatapit:Agent node; undefined when name or identifier is missing (both are
 // mandatory), so the validator reports the gap instead of a half-filled agent.
 function agentNode(a?: ItAgent): JsonLdNode | undefined {
@@ -98,12 +127,10 @@ export const dcatApItProfile: DcatProfile = {
       const holder = agentNode(ov.rightsHolder)
       if (holder) ds['dct:rightsHolder'] = holder
       if (ov.accrualPeriodicity) ds['dct:accrualPeriodicity'] = ov.accrualPeriodicity
-      // Themes are skos:Concept nodes in DCAT-AP_IT (the AgID validator warns when the
-      // feed has no skos:Concept at all).
       if (ds['dcat:theme']) {
         ds['dcat:theme'] = ([] as unknown[])
           .concat(ds['dcat:theme'])
-          .map((t) => (typeof t === 'string' ? { '@id': t, '@type': 'skos:Concept' } : t))
+          .map((t) => (typeof t === 'string' ? themeNode(t) : t))
       }
       const license = licenseNode(ds['dct:license'])
       ds['dcat:distribution'] = ((ds['dcat:distribution'] ?? []) as JsonLdNode[]).map((d) => {
