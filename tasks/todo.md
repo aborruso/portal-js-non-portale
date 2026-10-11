@@ -47,7 +47,7 @@ Confronto tra il feed pubblicato oggi e gli obbligatori DCAT-AP_IT (tabella 1.3.
 → verifica: `DCAT_PROFILES=dcat-ap-it npm run build` produce `catalog.dcat-ap-it.{jsonld,ttl,rdf}` senza avvisi
 
 ### Fase 3 - Validazione
-- [ ] Caricare il feed su https://validatore.dati.gov.it: zero errori
+- [x] Caricare il feed su https://validatore.dati.gov.it: zero errori
 - [x] Opzionale: eseguire in locale le 157 regole SPARQL di `italia/daf-semantic-validator`, per avere il controllo anche in build
 - [x] Controllare che i feed `dcat-3` esistenti non cambino
 → verifica: report del validatore senza errori; diff dei feed `dcat-3` vuoto
@@ -55,8 +55,8 @@ Confronto tra il feed pubblicato oggi e gli obbligatori DCAT-AP_IT (tabella 1.3.
 ### Fase 4 - Pubblicazione
 - [x] Aggiungere `dcat-ap-it` a `profiles` in `dcat.config.json`
 - [x] Pagina del wiki sul DCAT, `log.md`
-- [ ] PR, merge, deploy; verifica del feed online
-- [ ] Riprendere upstream (datopian/portaljs#1668) con il link all'implementazione
+- [x] PR, merge, deploy; verifica del feed online
+- [x] Riprendere upstream (datopian/portaljs#1668) con il link all'implementazione
 → verifica: `/portaljs/catalog.dcat-ap-it.ttl` risponde 200 e passa il validatore
 
 ## Domande aperte
@@ -70,7 +70,8 @@ Confronto tra il feed pubblicato oggi e gli obbligatori DCAT-AP_IT (tabella 1.3.
 ## Revisione (2026-10-11)
 
 - Decisioni: editore Associazione onData (codice fiscale 97309210827, contatto info@ondata.it); titolare la fonte (ISO, Natural Earth; Datopian per i 5 dataset senza fonte, licenza MIT del repo `datopian/portaljs`); frequenza `UNKNOWN`; dati di esempio.
-- Validazione locale con `dcat-ap-it-generator` 0.1.9 (122 regole): 0 errori, 22 avvisi su proprietà raccomandate. Il validatore online AgID non è stato provato: richiede l'upload dal browser.
+- Validazione locale con `dcat-ap-it-generator` 0.1.9 (122 regole): 0 errori, 22 avvisi su proprietà raccomandate. Validatore online AgID sul feed pubblicato: nessun errore, solo warning (prova manuale, 2026-10-11).
 - Validatore UE DCAT-AP 3.0.1 base: conformi `dcat-3` e `dcat-ap-it`, a parte 5 violazioni `foaf:name` che compaiono anche su un catalogo minimo (vengono dal validatore).
 - Trovato e corretto un difetto del template: i dataset con più file non avevano distribuzioni in nessun feed DCAT (`toDCAT` in `lib/metadata/dcat.ts`). Da segnalare upstream.
 - Domanda 4 risolta: le regole AgID accettano `xsd:date` e `xsd:dateTime`. Domanda 5: si usa il comando `validate` di `dcat-ap-it-generator`, non in build.
+- Dopo il merge di #7: feed online, #5 chiusa, datopian/portaljs#1668 riaperta con il link all'implementazione; difetto delle distribuzioni segnalato in datopian/portaljs#1669.
