@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import DebouncedInput from '../components/ui/DebouncedInput'
 import { datasetHref, getResources, type Dataset } from '../lib/datasets'
 import { provider } from '../lib/providers'
+import { formatNumber, t, tn } from '../lib/i18n'
 
 export async function getStaticProps() {
   return { props: { datasets: await provider.listDatasets() } }
@@ -80,7 +81,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
     )
   }, [datasets, query])
 
-  const catOf = (d: Dataset) => d.category ?? 'Other'
+  const catOf = (d: Dataset) => d.category ?? t('search.other')
   const matchesCats = (d: Dataset) => activeCats.size === 0 || activeCats.has(catOf(d))
   const matchesNs = (d: Dataset) => activeNs.size === 0 || activeNs.has(d.namespace)
 
@@ -101,7 +102,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
     for (const d of searched.filter(matchesNs))
       counts.set(catOf(d), (counts.get(catOf(d)) ?? 0) + 1)
     return Array.from(counts.entries()).sort(([a], [b]) =>
-      a === 'Other' ? 1 : b === 'Other' ? -1 : a.localeCompare(b)
+      a === t('search.other') ? 1 : b === t('search.other') ? -1 : a.localeCompare(b)
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasets, searched, activeNs])
@@ -127,32 +128,33 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
   return (
     <>
       <Head>
-        <title>Search — PortalJS demo</title>
+        <title>{`${t('nav.search')} — PortalJS demo`}</title>
       </Head>
       <main
         className={`mx-auto px-6 pb-24 sm:px-16 ${hasFacets ? 'max-w-[1100px]' : 'max-w-[720px]'}`}
       >
         <nav className="pt-7 font-sans text-[13px] font-medium text-ink/50">
           <Link href="/" className="text-inherit no-underline hover:text-accent">
-            Home
+            {t('nav.home')}
           </Link>
-          <span className="text-ink"> / Search</span>
+          <span className="text-ink"> / {t('nav.search')}</span>
         </nav>
 
         <div className="flex items-baseline gap-4 pb-6 pt-9">
-          <h1 className="font-serif text-[42px] font-semibold text-ink">Datasets</h1>
+          <h1 className="font-serif text-[42px] font-semibold text-ink">{t('search.heading')}</h1>
           {datasets.length > 0 && (
             <span className="font-sans text-[13px] font-medium text-ink/50">
-              {filtered.length} {filtered.length === 1 ? 'result' : 'results'}
+              {tn('search.results', filtered.length)}
             </span>
           )}
         </div>
 
         {datasets.length === 0 ? (
           <div className="py-10 font-serif text-[17px] italic text-ink/55">
-            No datasets yet — add an entry to{' '}
-            <code className="font-mono not-italic">datasets.json</code> and drop the
-            file in <code className="font-mono not-italic">public/data</code>.
+            {t('search.empty.before')}{' '}
+            <code className="font-mono not-italic">datasets.json</code>{' '}
+            {t('search.empty.middle')}{' '}
+            <code className="font-mono not-italic">public/data</code>.
           </div>
         ) : (
           <div className={hasFacets ? 'lg:grid lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-12' : ''}>
@@ -160,7 +162,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
               <aside className="pt-4">
                 {catFacets && (
                   <FacetGroup
-                    title="Categories"
+                    title={t('search.categories')}
                     options={catFacets}
                     active={activeCats}
                     onToggle={(v) => toggle(activeCats, v, setActiveCats)}
@@ -169,7 +171,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
                 )}
                 {nsFacets && (
                   <FacetGroup
-                    title="Publishers"
+                    title={t('search.publishers')}
                     options={nsFacets}
                     active={activeNs}
                     onToggle={(v) => toggle(activeNs, v, setActiveNs)}
@@ -183,13 +185,13 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
               <DebouncedInput
                 value={query}
                 onChange={(v) => setQuery(String(v))}
-                placeholder="Search datasets…"
-                aria-label="Search datasets"
+                placeholder={t('home.searchPlaceholder')}
+                aria-label={t('home.searchLabel')}
                 className="w-full border-0 border-b border-ink/30 bg-transparent pb-3.5 font-serif text-lg italic text-ink placeholder:text-ink/40 focus:border-accent focus:outline-none"
               />
               {filtered.length === 0 ? (
                 <div className="py-10 font-serif text-[17px] italic text-ink/55">
-                  No datasets found{query ? ` for “${query}”` : ' for the selected filters'}.
+                  {query ? t('search.noResultsQuery', { query }) : t('search.noResultsFilters')}
                 </div>
               ) : (
                 <div className="pt-2">
@@ -233,7 +235,7 @@ function FacetGroup({
             onClick={onClear}
             className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[11px] font-medium text-accent hover:underline"
           >
-            Clear
+            {t('common.clear')}
           </button>
         )}
       </div>
@@ -321,7 +323,7 @@ function DatasetRow({ ds }: { ds: Dataset }) {
           <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-1 font-sans text-[11px] text-ink/45">
             {typeof ds.recordCount === 'number' && (
               <span className="font-medium tabular-nums">
-                {ds.recordCount.toLocaleString('en-US')} {geo ? 'features' : 'records'}
+                {tn(geo ? 'search.features' : 'search.records', ds.recordCount)}
               </span>
             )}
             {fields.slice(0, 3).map((f) => (
@@ -332,7 +334,7 @@ function DatasetRow({ ds }: { ds: Dataset }) {
                 {f}
               </span>
             ))}
-            {fields.length > 3 && <span>+{fields.length - 3} more</span>}
+            {fields.length > 3 && <span>{t('search.moreFields', { count: formatNumber(fields.length - 3) })}</span>}
           </div>
         )}
       </div>

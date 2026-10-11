@@ -1,4 +1,5 @@
 import Papa from 'papaparse'
+import { t } from '../../lib/i18n'
 
 // Tolerant CSV parse. Real-world CSV exports often carry a `#` comment/metadata
 // preamble, a BOM, or a few ragged rows — none of which should blank the whole
@@ -16,8 +17,8 @@ export function parseCsv(csv: string) {
   // data rows still returns its fields, so the table renders columns + an empty
   // state rather than erroring.
   if (rows.length === 0 && fields.length === 0) {
-    const msg = result.errors.map((e) => `row ${e.row ?? '?'}: ${e.message}`).join('; ')
-    throw new Error(`CSV parse error — ${msg || 'no rows parsed'}`)
+    const msg = result.errors.map((e) => t('csv.row', { row: e.row ?? '?', message: e.message })).join('; ')
+    throw new Error(t('csv.error', { detail: msg || t('csv.noRows') }))
   }
   if (result.errors.length > 0 && typeof console !== 'undefined') {
     console.warn(

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { t } from '../lib/i18n'
 
 // Site navbar, rendered on every page via `_app.tsx`. Editorial style imported
 // from the Claude Design mockups: a tall hairline-ruled bar with a Newsreader
@@ -16,7 +17,7 @@ export default function Navbar() {
         <Link
           href="/"
           className="font-serif text-[21px] font-medium italic text-ink no-underline"
-          aria-label="PortalJS demo — home"
+          aria-label={t('nav.homeAria', { name: 'PortalJS demo' })}
         >
           PortalJS demo
         </Link>
@@ -24,7 +25,7 @@ export default function Navbar() {
           href="/search"
           className="font-sans text-xs font-semibold uppercase tracking-[0.08em] text-ink/75 transition-colors hover:text-accent"
         >
-          Search
+          {t('nav.search')}
         </Link>
       </nav>
     </header>
