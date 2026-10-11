@@ -37,7 +37,7 @@ I feed si rigenerano a ogni build (`scripts/generate-dcat.ts`) da `datasets.json
 | DCAT 3 (W3C) | `catalog.jsonld`, `catalog.ttl`, `catalog.rdf` e le copie `catalog.dcat-3.*` |
 | DCAT-AP_IT (dati.gov.it) | `catalog.dcat-ap-it.jsonld`, `.ttl`, `.rdf` |
 
-L'elenco dei feed è in `catalog-feeds.json`; i suoi percorsi oggi mancano del prefisso `/portaljs` (issue #6).
+L'elenco dei feed è in `catalog-feeds.json`, con i percorsi completi del prefisso `/portaljs`, preso dal `basePath` di `next.config.js`.
 
 # Da dove vengono i metadati
 

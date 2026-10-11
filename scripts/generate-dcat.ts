@@ -24,6 +24,7 @@
 import { mkdir, writeFile, readFile } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
+import { createRequire } from 'node:module'
 import { provider } from '../lib/providers'
 import {
   toDCATCatalog,
@@ -40,6 +41,17 @@ import '../lib/metadata/dcat-ap-it'
 
 const OUT_DIR = join(process.cwd(), 'public')
 const CONFIG_FILE = join(process.cwd(), 'dcat.config.json')
+
+// The site's sub-path (next.config.js `basePath`, e.g. "/portaljs"). catalog-feeds.json
+// lists each feed as served, so its paths must carry it. Empty when served at the root.
+function basePath(): string {
+  try {
+    const cfg = createRequire(join(process.cwd(), 'package.json'))('./next.config.js')
+    return String(cfg.basePath ?? '').replace(/\/+$/, '')
+  } catch {
+    return ''
+  }
+}
 
 type DcatFileConfig = DcatConfig & {
   profiles?: string[]
@@ -149,7 +161,7 @@ async function main() {
         profile: profile.id,
         label: profile.label,
         format,
-        path: `/${file}`,
+        path: `${basePath()}/${file}`,
         conformsTo: profile.conformsTo,
       })
 
