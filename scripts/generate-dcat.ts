@@ -35,6 +35,8 @@ import {
   type RdfFormat,
   type JsonLdNode,
 } from '../lib/metadata'
+// Profilo DCAT-AP_IT: si registra all'import.
+import '../lib/metadata/dcat-ap-it'
 
 const OUT_DIR = join(process.cwd(), 'public')
 const CONFIG_FILE = join(process.cwd(), 'dcat.config.json')

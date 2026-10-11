@@ -47,7 +47,13 @@
       }
     ],
     "keywords": ["countries", "iso", "reference"],
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "modified": "2026-10-11T20:01:10Z",
+    "dcat": {
+      "themes": ["http://publications.europa.eu/resource/authority/data-theme/INTR"],
+      "rightsHolder": { "name": "International Organization for Standardization (ISO)", "identifier": "iso.org", "homepage": "https://www.iso.org/" },
+      "accrualPeriodicity": "http://publications.europa.eu/resource/authority/frequency/UNKNOWN"
+    }
   },
   {
     "slug": "population-2022",
@@ -57,10 +63,21 @@
     "file": "population-2022.csv",
     "format": "csv",
     "dcat": {
+      "themes": ["http://publications.europa.eu/resource/authority/data-theme/SOCI"],
+      "rightsHolder": { "name": "Datopian", "identifier": "datopian.com", "homepage": "https://www.datopian.com/" },
+      "accrualPeriodicity": "http://publications.europa.eu/resource/authority/frequency/UNKNOWN",
       "spatial": {
         "bbox": "POLYGON((-180 -90, 180 -90, 180 90, -180 90, -180 -90))"
       }
-    }
+    },
+    "modified": "2026-10-11T20:01:10Z",
+    "licenses": [
+      {
+        "name": "MIT",
+        "title": "MIT License (repository datopian/portaljs)",
+        "path": "https://github.com/datopian/portaljs/blob/main/license"
+      }
+    ]
   },
   {
     "slug": "co2-emissions",
@@ -68,7 +85,20 @@
     "name": "CO₂ Emissions per Capita",
     "description": "Tonnes of CO₂ emitted per person for a sample of countries.",
     "file": "co2-emissions.csv",
-    "format": "csv"
+    "format": "csv",
+    "modified": "2026-10-11T20:01:10Z",
+    "licenses": [
+      {
+        "name": "MIT",
+        "title": "MIT License (repository datopian/portaljs)",
+        "path": "https://github.com/datopian/portaljs/blob/main/license"
+      }
+    ],
+    "dcat": {
+      "themes": ["http://publications.europa.eu/resource/authority/data-theme/ENVI"],
+      "rightsHolder": { "name": "Datopian", "identifier": "datopian.com", "homepage": "https://www.datopian.com/" },
+      "accrualPeriodicity": "http://publications.europa.eu/resource/authority/frequency/UNKNOWN"
+    }
   },
   {
     "slug": "country-indicators",
@@ -98,7 +128,20 @@
         "title": "CO₂ emissions per capita",
         "description": "Tonnes of CO₂ emitted per person."
       }
-    ]
+    ],
+    "modified": "2026-10-11T20:01:10Z",
+    "licenses": [
+      {
+        "name": "MIT",
+        "title": "MIT License (repository datopian/portaljs)",
+        "path": "https://github.com/datopian/portaljs/blob/main/license"
+      }
+    ],
+    "dcat": {
+      "themes": ["http://publications.europa.eu/resource/authority/data-theme/SOCI", "http://publications.europa.eu/resource/authority/data-theme/ENVI"],
+      "rightsHolder": { "name": "Datopian", "identifier": "datopian.com", "homepage": "https://www.datopian.com/" },
+      "accrualPeriodicity": "http://publications.europa.eu/resource/authority/frequency/UNKNOWN"
+    }
   },
   {
     "slug": "fruit-sales",
@@ -107,7 +150,20 @@
     "description": "Monthly fruit units sold and revenue — a small tabular sample.",
     "file": "fruit-sales.csv",
     "format": "csv",
-    "keywords": ["sales", "fruit"]
+    "keywords": ["sales", "fruit"],
+    "modified": "2026-10-11T20:01:10Z",
+    "licenses": [
+      {
+        "name": "MIT",
+        "title": "MIT License (repository datopian/portaljs)",
+        "path": "https://github.com/datopian/portaljs/blob/main/license"
+      }
+    ],
+    "dcat": {
+      "themes": ["http://publications.europa.eu/resource/authority/data-theme/ECON"],
+      "rightsHolder": { "name": "Datopian", "identifier": "datopian.com", "homepage": "https://www.datopian.com/" },
+      "accrualPeriodicity": "http://publications.europa.eu/resource/authority/frequency/UNKNOWN"
+    }
   },
   {
     "slug": "region-metrics",
@@ -123,7 +179,20 @@
         "title": "Region metrics",
         "query": "SELECT region, round(avg(rating), 2) AS avg_rating, sum(sales) AS total_sales\nFROM data\nGROUP BY region\nORDER BY total_sales DESC\nLIMIT 10;"
       }
-    ]
+    ],
+    "modified": "2026-10-11T20:01:10Z",
+    "licenses": [
+      {
+        "name": "MIT",
+        "title": "MIT License (repository datopian/portaljs)",
+        "path": "https://github.com/datopian/portaljs/blob/main/license"
+      }
+    ],
+    "dcat": {
+      "themes": ["http://publications.europa.eu/resource/authority/data-theme/ECON"],
+      "rightsHolder": { "name": "Datopian", "identifier": "datopian.com", "homepage": "https://www.datopian.com/" },
+      "accrualPeriodicity": "http://publications.europa.eu/resource/authority/frequency/UNKNOWN"
+    }
   },
   {
     "slug": "world-boundaries",
@@ -161,6 +230,12 @@
       }
     ],
     "keywords": ["boundaries", "countries", "geospatial", "pmtiles", "geoparquet", "duckdb"],
-    "version": "1.1.0"
+    "version": "1.1.0",
+    "modified": "2026-10-11T20:01:10Z",
+    "dcat": {
+      "themes": ["http://publications.europa.eu/resource/authority/data-theme/INTR"],
+      "rightsHolder": { "name": "Natural Earth", "identifier": "naturalearthdata.com", "homepage": "https://www.naturalearthdata.com/" },
+      "accrualPeriodicity": "http://publications.europa.eu/resource/authority/frequency/UNKNOWN"
+    }
   }
 ]
