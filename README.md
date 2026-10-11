@@ -1,6 +1,6 @@
 # PortalJS demo
 
-Portale di dati costruito con [PortalJS](https://github.com/datopian/portaljs), pubblicato su https://srv2031803.hstgr.cloud/portaljs/.
+Portale di dati costruito con [PortalJS](https://github.com/datopian/portaljs), pubblicato su https://srv2031803.hstgr.cloud/portaljs/. La documentazione è nel [wiki](wiki/index.md).
 
 ## Sviluppare
 
@@ -23,14 +23,14 @@ Questo repository è una copia del template `examples/portaljs-catalog`, non un 
 git switch upstream
 REF=<commit o tag di datopian/portaljs>
 tmp=$(mktemp -d)
-npx -y create-portaljs@latest "$tmp/p" -y --ref "$REF" --name "PortalJS demo" --description "Demo di PortalJS sul VPS" --no-git --no-install
-rsync -a --delete --exclude .git --exclude node_modules --exclude .next --exclude out "$tmp/p/" ./
+npx -y create-portaljs@latest "$tmp/portal-js-non-portale" -y --ref "$REF" --name "PortalJS demo" --description "Demo di PortalJS sul VPS" --no-git --no-install
+rsync -a --delete --exclude .git --exclude node_modules --exclude .next --exclude out "$tmp/portal-js-non-portale/" ./
 git add -A && git commit -m "upstream: template @ $REF"
 git switch main && git merge upstream     # conflitti solo dove abbiamo cambiato le stesse righe
 npm install && npm run build
 ```
 
-Il nome e la descrizione vanno passati uguali a quelli usati la prima volta, altrimenti il diff li segnala come modifiche. Versione di partenza: `create-portaljs` 0.6.0, template al commit `d5c096aa6a4c`.
+La cartella temporanea va chiamata `portal-js-non-portale` e nome e descrizione vanno passati uguali alla prima volta: `create-portaljs` li scrive in `package.json`, `package-lock.json` e `README.md`, e se cambiano il diff li segnala come modifiche. Dettagli in [`wiki/procedure/aggiornare-il-template.md`](wiki/procedure/aggiornare-il-template.md). Versione di partenza: `create-portaljs` 0.6.0, template al commit `d5c096aa6a4c`.
 
 ---
 
