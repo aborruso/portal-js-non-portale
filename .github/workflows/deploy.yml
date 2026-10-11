@@ -20,6 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          # cronologia completa: la sezione «Attività» dei dataset legge il git log
+          # di ogni file (lib/history.ts); con un clone a un solo commit tutti i file
+          # risulterebbero modificati dall'ultimo commit
+          fetch-depth: 0
 
       - uses: actions/setup-node@v7
         with:
