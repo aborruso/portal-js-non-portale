@@ -79,7 +79,7 @@ uvx --from dcat-ap-it-generator dcat-ap-it validate public/catalog.dcat-ap-it.tt
 
 Il 2026-10-11, con la versione 0.1.9, il feed dà 0 errori e 22 avvisi, tutti su proprietà raccomandate (descrizione delle distribuzioni, lingua e data di rilascio del catalogo, `dct:subject`, tipo della licenza).
 
-Il validatore online di AgID usa le regole originali e richiede il caricamento del file dal browser.[^validatore]
+Il validatore online di AgID usa le regole originali e richiede il caricamento del file dal browser.[^validatore] Il 2026-10-11 il feed pubblicato (`catalog.dcat-ap-it.ttl`) non ha dato errori, solo warning.
 
 Per DCAT-AP europeo, il validatore UE (`https://www.itb.ec.europa.eu/shacl/dcat-ap/upload`, tipo «DCAT-AP 3.0.1 Base») restituisce sempre 5 violazioni su `foaf:name`, anche per un catalogo minimo senza agenti: vengono dai vocabolari che il validatore carica, non dal feed. Al netto di quelle, i feed `dcat-3` e `dcat-ap-it` sono conformi.
 
