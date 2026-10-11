@@ -1,5 +1,8 @@
 # Registro degli aggiornamenti del wiki
 
+## 2026-10-12
+* **Modifica**: il tema grafico attivo diventa `italia` ([temi grafici](portale/temi.md)).
+
 ## 2026-10-11
 * **Creazione**: documentati i [temi grafici](portale/temi.md), con il tema italia accanto a quello del template.
 * **Creazione**: documentato il [catalogo DCAT](portale/dcat.md), con il nuovo profilo DCAT-AP_IT.
