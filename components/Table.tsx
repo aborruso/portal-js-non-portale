@@ -134,7 +134,7 @@ export function Table({ data: initialData = [], cols: initialCols = [], csv = ''
         />
       </div>
       <div className="overflow-x-auto border border-ink/[0.18]">
-        <table className="w-full border-collapse text-sm">
+        <table data-ui="table" className="w-full border-collapse text-sm">
           <thead>
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>

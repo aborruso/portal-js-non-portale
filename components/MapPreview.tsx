@@ -19,6 +19,7 @@ import {
 } from '../lib/query/logical'
 import MapQueryPanel from './MapQueryPanel'
 import { resourceUrl, type Resource } from '../lib/datasets'
+import { themeConfig } from '../lib/theme'
 import { t } from '../lib/i18n'
 
 // The dataset-page map — ONE MapLibre instance that carries both serverless geo
@@ -48,16 +49,15 @@ import { t } from '../lib/i18n'
 // Make PMTiles from GeoJSON/Shapefile with tippecanoe (see README "Maps"):
 //   tippecanoe -zg --drop-densest-as-needed -o out.pmtiles in.geojson
 
-// Terracotta accent from tailwind.config.js (oklch(0.48 0.12 40)) — MapLibre
-// paint needs a literal color, not a Tailwind class. The PMTiles base layer uses
-// this.
-const ACCENT = '#9d4a2c'
+// Accent of the active theme (lib/theme.ts) — MapLibre paint needs a literal
+// color, not a Tailwind class. The PMTiles base layer uses this.
+const ACCENT = themeConfig.map.accent
 
-// A high-contrast blue for the query-result HIGHLIGHT overlay, so features
-// returned by a spatial query pop clearly on top of the terracotta base render
-// and the light basemap. Deliberately NOT the accent — the highlight has to read
-// as "these are the rows your query matched", distinct from the full render.
-const HIGHLIGHT = '#1d4ed8'
+// A high-contrast colour for the query-result HIGHLIGHT overlay (from the active
+// theme), so features returned by a spatial query pop clearly on top of the base
+// render and the light basemap. Deliberately NOT the accent — the highlight has to
+// read as "these are the rows your query matched", distinct from the full render.
+const HIGHLIGHT = themeConfig.map.highlight
 
 // Light, neutral, keyless vector basemap (Carto Positron via OpenFreeMap),
 // loaded at runtime in the browser only. Low-contrast greys/whites so the data
@@ -396,7 +396,7 @@ export default function MapPreview({
         sources: {},
         layers: [
           // Matches the cream-panel canvas so a basemap-less map still looks placed.
-          { id: 'background', type: 'background', paint: { 'background-color': '#ece7db' } },
+          { id: 'background', type: 'background', paint: { 'background-color': themeConfig.map.background } },
         ],
       }
 
@@ -494,10 +494,10 @@ export default function MapPreview({
                   'interpolate',
                   ['linear'],
                   ['heatmap-density'],
-                  0, 'rgba(157,74,44,0)',
-                  0.2, 'rgba(157,74,44,0.25)',
-                  0.5, 'rgba(157,74,44,0.55)',
-                  1, 'rgba(157,74,44,0.85)',
+                  0, `rgba(${themeConfig.map.accentRgb},0)`,
+                  0.2, `rgba(${themeConfig.map.accentRgb},0.25)`,
+                  0.5, `rgba(${themeConfig.map.accentRgb},0.55)`,
+                  1, `rgba(${themeConfig.map.accentRgb},0.85)`,
                 ],
                 // Fade the heatmap out over z11→13 as the circle layer fades in.
                 'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0.9, 13, 0],
@@ -657,7 +657,8 @@ export default function MapPreview({
         {queryResource && ranged && (
           <span
             title={t('map.geoparquetTitle')}
-            className="border border-[#1d4ed8]/50 px-1.5 py-0.5 font-sans text-[10px] font-medium uppercase tracking-[0.06em] text-[#1d4ed8]"
+            style={{ color: HIGHLIGHT, borderColor: `rgba(${themeConfig.map.highlightRgb},0.5)` }}
+            className="border px-1.5 py-0.5 font-sans text-[10px] font-medium uppercase tracking-[0.06em]"
           >
             {t('map.geoparquetBadge')}
           </span>

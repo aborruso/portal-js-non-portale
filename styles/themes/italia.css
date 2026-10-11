@@ -51,3 +51,34 @@
 [data-theme='italia'] [data-ui='page'] form[role='search'] {
   max-width: 760px;
 }
+/* Primary action (the dataset's download button): a primary button, as in the
+   Design System Italia, instead of the template's ink-black one. */
+[data-theme='italia'] [data-ui='primary-action'] {
+  background-color: var(--theme-accent);
+  border-radius: 4px;
+}
+[data-theme='italia'] [data-ui='primary-action']:hover {
+  background-color: var(--it-color-background-primary-hover);
+}
+/* Data tables (preview, SQL results, map query results, schema), as Bootstrap
+   Italia tables: no header background, header cells in plain bold text instead of
+   the template's small caps, neutral borders (--it-color-border-subtle). */
+[data-theme='italia'] [data-ui='table'] thead tr,
+[data-theme='italia'] [data-ui='table'] th {
+  background-color: transparent;
+  color: var(--it-color-text-base);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+[data-theme='italia'] [data-ui='table'] thead tr {
+  border-bottom: 2px solid var(--it-color-border-subtle);
+}
+[data-theme='italia'] [data-ui='table'] tbody tr {
+  border-color: var(--it-color-border-subtle);
+}
+[data-theme='italia'] :has(> [data-ui='table']) {
+  border-color: var(--it-color-border-subtle);
+}
+

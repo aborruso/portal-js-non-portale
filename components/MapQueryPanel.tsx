@@ -527,7 +527,7 @@ function ResultTable({
   if (!rows.length) return <p className="font-serif text-[15px] italic text-ink/55">{t('common.noRows')}</p>
   return (
     <div className="overflow-x-auto border border-ink/[0.18]">
-      <table className="min-w-full border-collapse text-sm">
+      <table data-ui="table" className="min-w-full border-collapse text-sm">
         <thead>
           <tr>
             {columns.map((c) => {
