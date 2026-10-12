@@ -161,7 +161,7 @@ async function main() {
     )
     // The country-codes dataset carries a Table Schema → a recordSet with fields.
     const parsed = JSON.parse(body) as { dataset: Record<string, unknown>[] }
-    const cc = parsed.dataset.find((d) => d.name === 'reference_country-codes')
+    const cc = parsed.dataset.find((d) => d.name === 'ondata_country-codes')
     ok(Array.isArray(cc?.recordSet) && (cc!.recordSet as unknown[]).length >= 1, 'croissant: schema-bearing dataset emits a cr:RecordSet')
     ok(cc?.conformsTo === 'http://mlcommons.org/croissant/1.0', 'croissant: dataset stamps Croissant 1.0 conformsTo')
   }

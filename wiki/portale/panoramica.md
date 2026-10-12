@@ -36,10 +36,10 @@ sources:
 |---|---|---|
 | Home | `/portaljs` | `pages/index.tsx` |
 | Catalogo e ricerca | `/portaljs/search` | `pages/search.tsx` |
-| Scheda di un dataset | `/portaljs/@<tema>/<dataset>` | `pages/[owner]/[slug].tsx` |
+| Scheda di un dataset | `/portaljs/@<editore>/<dataset>` | `pages/[owner]/[slug].tsx` |
 | Feed DCAT | `/portaljs/catalog.jsonld` (e `.ttl`, `.rdf`) | generato da `scripts/generate-dcat.ts` |
 
-La scheda di un dataset mostra metadati, anteprima della tabella, editor SQL che gira nel browser, grafici, mappa per i dati geografici, download e licenza. I dataset sono raggruppati per tema (`NAMESPACE_TYPE = 'theme'` in `lib/datasets.ts`).
+La scheda di un dataset mostra metadati, anteprima della tabella, editor SQL che gira nel browser, grafici, mappa per i dati geografici, download e licenza. Il primo pezzo dell'indirizzo è l'editore (`NAMESPACE_TYPE = 'owner'` in `lib/datasets.ts`); i temi sono quelli ufficiali DCAT ([temi dei dataset](temi-dcat.md)).
 
 # Sola lettura
 

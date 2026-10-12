@@ -19,7 +19,7 @@ export type {
 // portal (datasets grouped by subject) or 'owner' for a multi-publisher portal
 // (datasets grouped by who published them). This only changes the showcase
 // metadata label ("Theme" vs "Owner") — the URL is always /@<namespace>/<slug>.
-export const NAMESPACE_TYPE: 'theme' | 'owner' = 'theme'
+export const NAMESPACE_TYPE: 'theme' | 'owner' = 'owner'
 
 // The compute engine for a dataset's data on its showcase page:
 //   'duckdb' — load the file into in-browser DuckDB-Wasm and expose a SQL query
