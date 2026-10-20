@@ -55,8 +55,8 @@ export default function Home({ suggested }: { suggested: string[] }) {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={t('home.searchPlaceholder')}
-            aria-label={t('home.searchLabel')}
+            placeholder={t('search.placeholder')}
+            aria-label={t('search.ariaLabel')}
             className="w-full border-0 border-b border-ink/30 bg-transparent pb-3.5 font-serif text-lg italic text-ink placeholder:text-ink/40 focus:border-accent focus:outline-none"
           />
         </form>
@@ -64,7 +64,7 @@ export default function Home({ suggested }: { suggested: string[] }) {
         {suggested.length > 0 && (
           <>
             <div className="mb-3.5 font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-ink/45">
-              {t('home.popular')}
+              {t('home.popularSearches')}
             </div>
             <div className="flex flex-wrap gap-x-[22px] gap-y-2">
               {suggested.map((q) => (
@@ -85,7 +85,7 @@ export default function Home({ suggested }: { suggested: string[] }) {
             href="/search"
             className="border-b border-accent pb-[3px] font-serif text-[17px] font-medium italic text-ink no-underline hover:text-accent"
           >
-            {t('home.browseAll')} &rarr;
+            {t('home.browseAll')}
           </Link>
         </div>
       </main>

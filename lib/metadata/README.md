@@ -137,7 +137,9 @@ getProfile('nope')                   // unknown -> falls back to L0 default
 DCAT/DCAT-AP is how a portal **exposes** its catalog for harvest and **ingests**
 from external catalogs. The Frictionless fields map onto DCAT-3 JSON-LD
 (`title→dct:title`, `keywords→dcat:keyword`, `licenses→dct:license`,
-`sources→dct:source`, `file/format→dcat:distribution`).
+`sources→dct:source`, and one `dcat:distribution` per file: the single `file`/`format`
+plus each `resources[]` entry — absolute resource URLs kept as-is, bare filenames under
+`<SITE_URL>/data/`).
 
 ```ts
 import { toDCAT, fromDCAT, toDCATCatalog, fromDCATCatalog } from './lib/metadata'
@@ -178,10 +180,30 @@ can emit several profiles at once. Which profiles + serializations to emit, and 
 catalog-level org/contact metadata they need, are authored in `dcat.config.json` and
 wired by the [`/portaljs-add-dcat`](/docs/skills/portaljs-add-dcat) skill.
 
+**DCAT-AP_IT (`dcat-ap-it`).** The Italian profile (AgID / dati.gov.it) is a full
+profile rather than a `makeNationalProfile` stamp: it adds the `dcatapit:*` types, agents
+with `dct:identifier` (the IPA code), `dct:rightsHolder` and `dct:accrualPeriodicity` on
+every dataset, and a licence on every distribution. It reads `publisher.identifier` from
+`dcat.config.json` and `dcat.rightsHolder` / `dcat.accrualPeriodicity` /
+`dcat.identifier` from a dataset's `dcat` block:
+
+```json
+{
+  "slug": "bilancio-2024",
+  "namespace": "finanze",
+  "dcat": {
+    "rightsHolder": { "name": "Comune di Palermo", "identifier": "c_g273" },
+    "accrualPeriodicity": "ANNUAL"
+  }
+}
+```
+
+See `DCAT-CONFORMANCE.md` for the mapping and its validation against the AgID rules.
+
 **What DCAT does not carry.** DCAT has no inline field schema — the Table Schema is
 referenced via a distribution's `dcat:describedBy`, not embedded. So `fromDCAT`
-recovers package metadata + the distribution (file/format), **not** the field-level
-schema. That asymmetry is intrinsic to DCAT.
+recovers package metadata + the distributions (one → `file`/`format`; several →
+`resources[]`), **not** the field-level schema. That asymmetry is intrinsic to DCAT.
 
 ## Out of scope here
 

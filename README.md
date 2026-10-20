@@ -36,10 +36,10 @@ La cartella temporanea va chiamata `portal-js-non-portale` e nome e descrizione 
 
 # PortalJS Catalog Template (dynamic routes)
 
-A template variant for portals with **many datasets**. Instead of one page file per
-dataset, the catalog is driven by a single manifest (`datasets.json`) and rendered by a
-dynamic route (`pages/[owner]/[slug].tsx` + `getStaticPaths`). Adding a dataset is one
-JSON entry plus a data file — no new page.
+The canonical PortalJS template — what `npm create portaljs` and `/portaljs-new-portal`
+scaffold. Instead of one page file per dataset, the catalog is driven by a single
+manifest (`datasets.json`) and rendered by a dynamic route (`pages/[owner]/[slug].tsx` +
+`getStaticPaths`). Adding a dataset is one JSON entry plus a data file — no new page.
 
 ## The three surfaces
 
@@ -52,22 +52,21 @@ JSON entry plus a data file — no new page.
 The home page's search box and chips navigate to `/search?q=…`; each search result links
 to its showcase at `/@<namespace>/<slug>`.
 
-## When to use this vs `portaljs-template`
-
-| | `portaljs-template` | `portaljs-catalog` (this) |
-|---|---|---|
-| Dataset pages | one `.tsx` file per dataset | one dynamic `[owner]/[slug].tsx` for all |
-| Registration | hardcoded array in `index.tsx` | `datasets.json` manifest |
-| Best for | a handful of datasets | dozens to hundreds |
-
-Both ship the same lightweight `components/Table.tsx`, Tailwind setup, and Next 14 config.
-
 ## Running
 
 ```bash
 cd examples/portaljs-catalog
 npm install
 npm run dev
+```
+
+To serve the portal under a sub-path (e.g. `https://example.org/portal`), build with
+`BASE_PATH=/portal` — `next.config.js` sets Next's `basePath` from it, and the head links,
+bundled data URLs and `catalog-feeds.json` paths pick it up too. Set `SITE_URL` to the
+full URL including the sub-path so the DCAT feeds' absolute links match:
+
+```bash
+BASE_PATH=/portal SITE_URL=https://example.org/portal npm run build
 ```
 
 ## Adding a dataset
@@ -232,6 +231,48 @@ Picking one mode keeps every `(@namespace, slug)` pair unique. The URL shape is
 `/@<namespace>/<slug>` regardless of which mode is chosen — `NAMESPACE_TYPE` only changes
 the metadata label on the showcase.
 
+## Language (UI strings)
+
+Every user-facing string in the template — navigation, search, facets, the showcase,
+the table, the SQL and map panels, error messages, placeholders, aria-labels — lives in
+`locales/en.json`, keyed by a dotted id grouped by area (`nav.*`, `search.*`,
+`dataset.*`, `download.*`, `query.*`, `map.*`, `errors.*`…). Pages and components read
+them through `lib/i18n.ts`:
+
+```tsx
+import { t, tn, formatNumber, formatDate } from '../lib/i18n'
+
+t('search.placeholder')                          // "Search datasets…"
+t('search.pageTitle', { name: 'My Portal' })     // "Search — My Portal"
+tn('dataset.fileCount', n)                       // "1 file" / "3 files" (Intl.PluralRules)
+formatNumber(3149)                               // "3,149"
+formatDate('2021-08-25')                         // "Aug 25, 2021"
+```
+
+The portal's language is a committed setting, **`DEFAULT_LOCALE` in `next.config.js`**
+(`'en'` by default), so every build and deploy uses it. It is one language per build:
+the portal is a static export, which Next.js's built-in i18n routing does not support.
+`NEXT_PUBLIC_LOCALE=<code> npm run build` overrides it for a single build.
+
+`<html lang>`, dates and numbers follow the locale. A key missing from a translation
+falls back to English (then to the key itself), with a console warning in development.
+
+**Set the portal's language** (e.g. Italian):
+
+1. Copy `locales/en.json` to `locales/it.json` and translate the values. Keep the keys and
+   `{placeholders}` verbatim, add the plural forms the language needs (`.one`/`.other`,
+   plus `.few`/`.many`… where `Intl.PluralRules` uses them), and set `_intl` to its BCP 47
+   tag (`"it-IT"`).
+2. Register it in `LOCALES` in `lib/i18n.ts` (one import + one entry).
+3. Set `const DEFAULT_LOCALE = 'it'` in `next.config.js`.
+4. Run `npm run i18n:check` (keys, placeholders, `_intl`, registration, `DEFAULT_LOCALE`).
+
+See `locales/README.md`.
+
+When you add UI to the template, put its strings in `locales/en.json` and every other
+`locales/*.json`, render them with `t()` — never hardcode English in JSX — and run
+`npm run i18n:check`.
+
 ## Placeholder tokens
 
 `/portaljs-new-portal` replaces these at scaffold time:
@@ -270,7 +311,11 @@ pages/index.tsx            — landing page: hero + search CTA + suggested chips
 pages/search.tsx           — searchable dataset list, reads manifest via getStaticProps
 pages/[owner]/[slug].tsx   — dynamic dataset showcase (/@<namespace>/<slug>)
 pages/_app.tsx             — renders the Navbar on every page
-pages/_document.tsx        — favicon / icon links + default meta description
+pages/_document.tsx        — favicon / icon links + default meta description + <html lang>
+lib/i18n.ts                — t() / tn() / formatNumber / formatDate; registered locales (LOCALES)
+locales/en.json            — every UI string, keyed by id (add <code>.json files for other languages)
+scripts/check-locales.mjs  — npm run i18n:check — validates locales/*.json against en.json
+next.config.js             — basePath (BASE_PATH) + DEFAULT_LOCALE, the portal's UI language
 public/data/               — bundled sample CSVs (inline); Parquet/PMTiles samples live on R2 (data.portaljs.com)
 public/{icon.svg,favicon.ico,apple-touch-icon.png,icon-512.png} — branding (placeholder)
 components/Navbar.tsx       — site navbar: logo (hover-spin) + name + link to /search

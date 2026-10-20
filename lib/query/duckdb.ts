@@ -115,7 +115,7 @@ export class DuckDbQuery implements DataQuery {
       // directly.
       const res = await fetch(source.url)
       if (!res.ok) {
-        throw new Error(t('error.fetch', { url: source.url, status: res.status }))
+        throw new Error(t('errors.fetchFailed', { url: source.url, status: res.status }))
       }
       const buf = new Uint8Array(await res.arrayBuffer())
       const fname = isParquet ? 'data.parquet' : 'data.csv'
@@ -142,7 +142,7 @@ export class DuckDbQuery implements DataQuery {
   }
 
   async query(sql: string): Promise<QueryResult> {
-    if (!this.conn) throw new Error(t('error.engineClosed'))
+    if (!this.conn) throw new Error(t('errors.engineNotOpen'))
     const table = await this.conn.query(sql)
     const columns: string[] = table.schema.fields.map((f: any) => f.name)
     const rows = table.toArray().map((row: any) => {

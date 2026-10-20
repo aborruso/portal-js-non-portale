@@ -188,7 +188,7 @@ export default function MapQueryPanel({
       <div className="border border-ink/[0.18] bg-cream-panel/40 px-4 py-3.5">
         <div className="mb-2.5 flex items-center justify-between gap-3">
           <span className="font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-ink/45">
-            {t('query.filterTitle')}
+            {t('query.filterHeading')}
           </span>
           <div className="relative">
             <button
@@ -259,7 +259,7 @@ export default function MapQueryPanel({
                 disabled={busy}
                 className="border border-ink/20 px-3 py-2 font-sans text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/60 hover:border-accent hover:text-accent disabled:opacity-40"
               >
-                {t('common.clear')}
+                {t('query.clear')}
               </button>
             )}
             <button
@@ -276,7 +276,7 @@ export default function MapQueryPanel({
               disabled={busy || loadingColumns}
               className="bg-accent px-4 py-2 font-sans text-[11px] font-semibold uppercase tracking-[0.06em] text-cream hover:opacity-90 disabled:opacity-50"
             >
-              {busy ? t('common.running') : t('query.apply')}
+              {busy ? t('query.running') : t('query.apply')}
             </button>
           </div>
         </div>
@@ -295,16 +295,14 @@ export default function MapQueryPanel({
                 : 'border-ink/20 bg-cream text-ink/70 hover:text-accent'
             }`}
           >
-            {t(`query.tab.${id}`)}
+            {t(`query.tabs.${id}`)}
           </button>
         ))}
         {tab !== 'sql' && (
           <span className="ml-auto font-mono text-[11px] text-ink/40">
             {loadingColumns
-              ? t('query.loading')
-              : totalRows != null && !active
-                ? tn('query.rowsOf', result.rows.length, { total: formatNumber(totalRows) })
-                : tn(active ? 'query.matched' : 'query.rows', result.rows.length)}
+              ? t('query.loadingShort')
+              : rowCountLabel(result.rows.length, active ? null : totalRows, active)}
           </span>
         )}
       </div>
@@ -339,11 +337,30 @@ export default function MapQueryPanel({
       </div>
 
       <p className="mt-2.5 font-sans text-xs text-ink/45">
-        {t('query.footer')}
+        {t('query.panelHint')}
       </p>
     </div>
   )
 }
+
+// "100 rows of 3,149" (unfiltered preview), "12 rows matched" (a user query is
+// driving the overlay), or just "12 rows".
+function rowCountLabel(n: number, total: number | null, matched: boolean): string {
+  const vars = { count: formatNumber(n) }
+  if (matched) return tn('query.rowsMatched', n, vars)
+  if (total != null) return tn('query.rowsOfTotal', n, { ...vars, total: formatNumber(total) })
+  return tn('query.rows', n, vars)
+}
+
+// Display label for a filter operator. The symbols are universal; the worded
+// operators are translated (the FilterOp value itself stays the internal id).
+const OP_KEYS: Partial<Record<FilterOp, string>> = {
+  contains: 'query.ops.contains',
+  'starts with': 'query.ops.startsWith',
+  'is empty': 'query.ops.isEmpty',
+  'is not empty': 'query.ops.isNotEmpty',
+}
+const opLabel = (op: FilterOp) => (OP_KEYS[op] ? t(OP_KEYS[op] as string) : op)
 
 // One filter chip: column (by alias) + operator + value.
 function FilterRow({
@@ -379,7 +396,7 @@ function FilterRow({
       >
         {ops.map((o) => (
           <option key={o} value={o}>
-            {o}
+            {opLabel(o)}
           </option>
         ))}
       </select>
@@ -388,7 +405,7 @@ function FilterRow({
           type={col && isNumericType(col.type) ? 'number' : 'text'}
           value={filter.value}
           onChange={(e) => onChange({ ...filter, value: e.target.value })}
-          placeholder={t('query.value')}
+          placeholder={t('query.valuePlaceholder')}
           className="min-w-[120px] flex-1 border border-ink/20 bg-cream px-2 py-1.5 font-sans text-[12px] text-ink"
         />
       )}
@@ -445,10 +462,10 @@ function SqlTab({
             />
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-ink/[0.15] px-4 py-2.5">
               <span
-                title={t('query.bboxTitle')}
+                title={t('query.spatialEngineTooltip')}
                 className="cursor-help font-mono text-[11px] text-ink/40"
               >
-                {t('query.sqlFooter')}
+                {t('query.spatialEngineHint')}
               </span>
               <button
                 type="button"
@@ -456,7 +473,7 @@ function SqlTab({
                 disabled={busy}
                 className="bg-accent px-[18px] py-2.5 font-sans text-xs font-semibold uppercase tracking-[0.06em] text-cream hover:opacity-90 disabled:opacity-50"
               >
-                {busy ? t('common.running') : t('common.run')}
+                {busy ? t('query.running') : t('query.run')}
               </button>
             </div>
           </div>
@@ -466,7 +483,7 @@ function SqlTab({
         {/* Schema panel — click a field to insert its (aliased) name. */}
         <div className="border border-ink/[0.18]">
           <div className="border-b border-ink/[0.12] bg-cream-panel px-3 py-2 font-sans text-[10px] font-semibold uppercase tracking-[0.08em] text-ink/55">
-            {t('query.columnsInsert')}
+            {t('query.columnsPanel')}
           </div>
           <div className="max-h-[260px] overflow-y-auto">
             {columns.map((c) => (
@@ -485,7 +502,7 @@ function SqlTab({
                   <span className="font-mono text-[10px] uppercase text-accent/80">{simpleType(c.type)}</span>
                   {sampleRow && sampleRow[c.alias] != null && (
                     <span className="truncate font-serif text-[11px] italic text-ink/50">
-                      {t('query.example', { value: String(sampleRow[c.alias]) })}
+                      {t('query.sampleValue', { value: String(sampleRow[c.alias]) })}
                     </span>
                   )}
                 </div>
@@ -524,7 +541,7 @@ function ResultTable({
   if (loadingColumns || (busy && !rows.length)) {
     return <p className="font-serif text-[15px] italic text-ink/55">{t('query.loadingData')}</p>
   }
-  if (!rows.length) return <p className="font-serif text-[15px] italic text-ink/55">{t('common.noRows')}</p>
+  if (!rows.length) return <p className="font-serif text-[15px] italic text-ink/55">{t('query.noRows')}</p>
   return (
     <div className="overflow-x-auto border border-ink/[0.18]">
       <table data-ui="table" className="min-w-full border-collapse text-sm">
@@ -570,7 +587,7 @@ function ResultChart({ columns, rows }: { columns: string[]; rows: Record<string
   if (!numericCol || !rows.length) {
     return (
       <p className="font-serif text-[15px] italic text-ink/55">
-        {t('query.chartHint')}
+        {t('query.chartEmpty')}
       </p>
     )
   }

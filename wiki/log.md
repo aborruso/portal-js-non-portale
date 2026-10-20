@@ -1,5 +1,11 @@
 # Registro degli aggiornamenti del wiki
 
+## 2026-10-20
+* **Modifica**: [lingua](portale/lingua.md) riscritta sul meccanismo del template 0.7.0 (`LOCALES`, `DEFAULT_LOCALE`, `npm run i18n:check`), con le 9 chiavi nostre.
+* **Modifica**: [catalogo DCAT](portale/dcat.md): il profilo DCAT-AP_IT ora è quello del template; temi come URI semplici, in attesa della risposta di AgID sulle regole 167 e 169.
+* **Modifica**: [panoramica](portale/panoramica.md): template 0.7.0, `basePath` da `BASE_PATH` e `withBasePath()` al posto dei percorsi scritti a mano.
+* **Modifica**: [aggiornare il template](procedure/aggiornare-il-template.md): ramo di lavoro e PR invece del merge diretto in `main`, regole per i conflitti, controlli dopo il merge.
+
 ## 2026-10-12
 * **Creazione**: documentati i [temi ed editore dei dataset](portale/temi-dcat.md): temi ufficiali DCAT nella ricerca e nella scheda, namespace come editore (`ondata`).
 * **Modifica**: [dati](portale/dati.md) e [panoramica](portale/panoramica.md) con gli indirizzi `/@ondata/…`.

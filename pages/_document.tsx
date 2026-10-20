@@ -1,7 +1,10 @@
 import { Html, Head, Main, NextScript } from 'next/document'
+import { withBasePath } from '../lib/basePath'
 import { LOCALE, t } from '../lib/i18n'
 import { THEME, themeConfig } from '../lib/theme'
 
+// Raw <link> hrefs are not basePath-aware, so site-root paths below go through
+// withBasePath — otherwise they 404 when the portal is served under a sub-path.
 export default function Document() {
   return (
     <Html lang={LOCALE} data-theme={THEME}>
@@ -9,9 +12,9 @@ export default function Document() {
         {/* Default PortalJS branding — PLACEHOLDER. Replace the files in `public/`
             (favicon.ico, icon.svg, apple-touch-icon.png, icon-512.png) with your
             own brand marks; these links can stay as-is once the files are swapped. */}
-        <link rel="icon" href="/portaljs/favicon.ico" sizes="any" />
-        <link rel="icon" type="image/svg+xml" href="/portaljs/icon.svg" />
-        <link rel="apple-touch-icon" href="/portaljs/apple-touch-icon.png" />
+        <link rel="icon" href={withBasePath('/favicon.ico')} sizes="any" />
+        <link rel="icon" type="image/svg+xml" href={withBasePath('/icon.svg')} />
+        <link rel="apple-touch-icon" href={withBasePath('/apple-touch-icon.png')} />
         <meta name="description" content="Demo di PortalJS sul VPS" />
         <meta name="theme-color" content={themeConfig.themeColor} />
         {/* DCAT feed autodiscovery — lets national/EU/US open-data portals (and
@@ -22,8 +25,8 @@ export default function Document() {
         <link
           rel="alternate"
           type="application/ld+json"
-          href="/portaljs/catalog.jsonld"
-          title={t('meta.catalogFeed')}
+          href={withBasePath('/catalog.jsonld')}
+          title={t('document.dcatFeedTitle')}
         />
         {/* Editorial type system (Claude Design import): Newsreader (serif),
             Work Sans (sans), IBM Plex Mono (SQL editor). Loaded via <link> — no

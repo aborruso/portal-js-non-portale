@@ -17,14 +17,16 @@
 // Configuration: dcat.config.json in the portal root (see that file). Which profiles
 // to emit, which serializations, and the catalog-level org/contact metadata the
 // profiles require (publisher, contactPoint, themes). Env overrides: SITE_URL (the
-// absolute site origin), DCAT_PROFILES (comma list, overrides config.profiles).
+// absolute site URL, including the base path if any), DCAT_PROFILES (comma list,
+// overrides config.profiles). The site-relative paths in catalog-feeds.json are
+// prefixed with `basePath` from next.config.js (set via BASE_PATH).
 //
 // Run: `tsx scripts/generate-dcat.ts` (invoked automatically by npm pre-scripts).
 
 import { mkdir, writeFile, readFile } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
-import { createRequire } from 'node:module'
+import nextConfig from '../next.config.js'
 import { provider } from '../lib/providers'
 import {
   toDCATCatalog,
@@ -36,22 +38,9 @@ import {
   type RdfFormat,
   type JsonLdNode,
 } from '../lib/metadata'
-// Profilo DCAT-AP_IT: si registra all'import.
-import '../lib/metadata/dcat-ap-it'
 
 const OUT_DIR = join(process.cwd(), 'public')
 const CONFIG_FILE = join(process.cwd(), 'dcat.config.json')
-
-// The site's sub-path (next.config.js `basePath`, e.g. "/portaljs"). catalog-feeds.json
-// lists each feed as served, so its paths must carry it. Empty when served at the root.
-function basePath(): string {
-  try {
-    const cfg = createRequire(join(process.cwd(), 'package.json'))('./next.config.js')
-    return String(cfg.basePath ?? '').replace(/\/+$/, '')
-  } catch {
-    return ''
-  }
-}
 
 type DcatFileConfig = DcatConfig & {
   profiles?: string[]
@@ -146,7 +135,7 @@ async function main() {
     if (result.errors.length) {
       console.warn(`⚠ DCAT ${profile.label}: ${result.errors.length} conformance error(s):`)
       for (const e of result.errors.slice(0, 10)) console.warn(`    - ${e.message}`)
-      console.warn(`  Fix in dcat.config.json (publisher/contactPoint) — see /portaljs-add-dcat.`)
+      console.warn(`  Fix in dcat.config.json (publisher/contactPoint) or the dataset's \`dcat\` block in datasets.json — see /portaljs-add-dcat.`)
     }
 
     // A profile may restrict which serializations are meaningful (Croissant → JSON-LD).
@@ -161,7 +150,7 @@ async function main() {
         profile: profile.id,
         label: profile.label,
         format,
-        path: `${basePath()}/${file}`,
+        path: `${nextConfig.basePath ?? ''}/${file}`,
         conformsTo: profile.conformsTo,
       })
 

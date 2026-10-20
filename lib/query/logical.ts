@@ -280,13 +280,13 @@ function numericColumn(columns: LogicalColumn[]): LogicalColumn | undefined {
 export function exampleQueries(columns: LogicalColumn[]): ExampleQuery[] {
   const attrs = attributeColumns(columns)
   const out: ExampleQuery[] = [
-    { label: t('query.ex.inView'), sql: DEFAULT_QUERY, limitToView: true },
+    { label: t('query.example.inView'), sql: DEFAULT_QUERY, limitToView: true },
   ]
   const cat = categoricalColumn(attrs)
   if (cat) {
     const c = quoteIdent(cat.alias)
     out.push({
-      label: t('query.ex.countBy', { column: cat.alias }),
+      label: t('query.example.countBy', { column: cat.alias }),
       sql: `SELECT ${c}, count(*) AS n\nFROM data\nGROUP BY ${c}\nORDER BY n DESC`,
     })
   }
@@ -294,7 +294,7 @@ export function exampleQueries(columns: LogicalColumn[]): ExampleQuery[] {
   if (num) {
     const n = quoteIdent(num.alias)
     out.push({
-      label: t('query.ex.topBy', { column: num.alias }),
+      label: t('query.example.topBy', { column: num.alias }),
       sql: `SELECT * FROM data\nORDER BY ${n} DESC\nLIMIT 10`,
     })
   }
@@ -333,7 +333,7 @@ function suggest(name: string, aliases: string[]): string[] {
 // otherwise it distills the common binder/parser/type errors and falls back to the
 // original message so nothing is ever swallowed.
 export function humanizeError(message: string, aliases: string[]): string {
-  const msg = message || t('error.queryFailed')
+  const msg = message || t('errors.queryFailed')
 
   // Unknown column — the most common casual-user error.
   const col =
@@ -343,33 +343,35 @@ export function humanizeError(message: string, aliases: string[]): string {
   if (/not found|does not exist/i.test(msg) && col) {
     const name = col[1]
     const hints = suggest(name, aliases)
+    const quoted = (xs: string[]) => xs.map((x) => t('errors.quoted', { text: x })).join(', ')
     const tail = hints.length
-      ? t('error.didYouMean', { list: hints.map((h) => `“${h}”`).join(', ') })
+      ? ' ' + t('errors.didYouMean', { columns: quoted(hints) })
       : aliases.length
-        ? t('error.availableColumns', {
-            list: aliases.slice(0, 8).map((a) => `“${a}”`).join(', ') + (aliases.length > 8 ? ', …' : ''),
+        ? ' ' +
+          t('errors.availableColumns', {
+            columns: quoted(aliases.slice(0, 8)) + (aliases.length > 8 ? ', …' : ''),
           })
         : ''
-    return t('error.unknownColumn', { name, tail })
+    return t('errors.unknownColumn', { name }) + tail
   }
 
   // Unknown table — usually a typo for `data`.
   const tbl = /Table with name ([^ ]+) does not exist/i.exec(msg)
-  if (tbl) return t('error.unknownTable', { name: tbl[1] })
+  if (tbl) return t('errors.unknownTable', { name: tbl[1] })
 
   // Type mismatch / conversion.
   if (/Conversion Error|Could not convert|Mismatch Type|type mismatch/i.test(msg)) {
-    return t('error.typeMismatch', { detail: firstLine(msg) })
+    return t('errors.typeMismatch', { detail: firstLine(msg) })
   }
 
   // Unknown / mis-called function.
   if (/No function matches|Function .* does not exist|Scalar Function/i.test(msg)) {
-    return t('error.unknownFunction', { detail: firstLine(msg) })
+    return t('errors.unknownFunction', { detail: firstLine(msg) })
   }
 
   // Syntax.
   if (/Parser Error|syntax error/i.test(msg)) {
-    return t('error.syntax', { detail: firstLine(msg).replace(/^Parser Error:\s*/i, '') })
+    return t('errors.syntax', { detail: firstLine(msg).replace(/^Parser Error:\s*/i, '') })
   }
 
   return firstLine(msg)
