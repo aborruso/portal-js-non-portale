@@ -30,18 +30,18 @@ rm -rf "$tmp/portal-js-non-portale"; npx -y create-portaljs@0.7.0 "$tmp/portal-j
 → verifica: `git diff --stat HEAD~1` mostra solo file del template (nessun file nostro: `wiki/`, `tasks/`, temi, `dcat-ap-it.ts`); `.claude/skills` aggiornate e non cancellate
 
 ### Fase 2 - Merge in un ramo nuovo
-- [ ] Ramo `template-0.7.0` da `main`, `git merge upstream`
-- [ ] Regola per i conflitti di traduzione: si tiene la versione di upstream di `lib/i18n.ts`, `locales/en.json` e delle chiamate `t()` nei componenti; poi si rimettono le nostre modifiche che non riguardano la lingua (tema italia, grafici, temi DCAT, profilo DCAT-AP_IT)
-- [ ] `lib/format.ts`: si segue upstream (cancellato) e si spostano gli usi su `formatNumber`/`formatDate` di `lib/i18n.ts`
-- [ ] `next.config.js`: forma di upstream più le nostre voci (`output: 'export'`, `images.unoptimized`, basePath di default `/portaljs`, `DEFAULT_LOCALE = 'it'`, `NEXT_PUBLIC_THEME`)
-- [ ] `package.json` e `package-lock.json`: lock di upstream, poi le nostre dipendenze in più e `npm install`, senza unire il lock a mano
-→ verifica: nessun marcatore di conflitto (`git diff --check`), `npx tsc --noEmit` pulito
+- [x] Ramo `template-0.7.0` da `main`, `git merge upstream`: 20 file in conflitto, tutti risolti il 2026-10-20
+- [x] Regola per i conflitti di traduzione: si tiene la versione di upstream di `lib/i18n.ts`, `locales/en.json` e delle chiamate `t()` nei componenti; poi si rimettono le nostre modifiche che non riguardano la lingua (tema italia, grafici, temi DCAT, profilo DCAT-AP_IT). Esito: componenti, pagine, `lib/i18n.ts`, `locales/en.json`, `logical.ts`, `duckdb.ts` da upstream, con `data-ui`, colori della mappa da `themeConfig`, `DatasetViews`, filtro e scheda dei temi DCAT, `NAMESPACE_TYPE = 'owner'` rimessi a mano; `dcat.config.json` con il commento di upstream e i nostri valori
+- [x] `lib/format.ts`: si segue upstream (cancellato) e si spostano gli usi su `formatNumber`/`formatDate` di `lib/i18n.ts`
+- [x] `next.config.js`: forma di upstream più le nostre voci (`output: 'export'`, `images.unoptimized`, basePath di default `/portaljs`, `DEFAULT_LOCALE = 'it'`, `NEXT_PUBLIC_THEME`)
+- [x] `package.json` e `package-lock.json`: fusi senza conflitti; in più rispetto a upstream solo `design-tokens-italia` e `recharts`; `npm ci` passa
+→ verifica: nessun marcatore di conflitto (`git diff --check`), `npx tsc --noEmit` pulito. Fatto: entrambi puliti
 
 ### Fase 3 - Togliere le correzioni superflue
 - [ ] `/portaljs` scritto a mano in `pages/_document.tsx` e `lib/datasets.ts` → `withBasePath()` di upstream
-- [ ] correzione della PR #10 (`catalog-feeds.json` con basePath) → quella di upstream (#1675)
-- [ ] correzione della PR #7 sulle distribuzioni (`toDCAT` in `lib/metadata/dcat.ts`) → quella di upstream (#1677); il profilo DCAT-AP_IT locale (`lib/metadata/dcat-ap-it.ts`) va confrontato con quello di upstream (#1678) e si decide se tenerlo (domanda 3)
-- [ ] etichetta del filtro da `NAMESPACE_TYPE` (PR #13) → quella di upstream (#1674)
+- [x] correzione della PR #10 (`catalog-feeds.json` con basePath) → quella di upstream (#1675): `scripts/generate-dcat.ts` preso da upstream nel merge
+- [x] correzione della PR #7 sulle distribuzioni (`toDCAT` in `lib/metadata/dcat.ts`) → quella di upstream (#1677); il profilo DCAT-AP_IT locale (`lib/metadata/dcat-ap-it.ts`) va confrontato con quello di upstream (#1678) e si decide se tenerlo (domanda 3). Fatto nel merge: `dcat.ts`, `dcat-validate.ts` da upstream; upstream ha il profilo `dcat-ap-it` in `dcat-profiles.ts` con gli stessi campi (`publisher.identifier`, `rightsHolder`, `accrualPeriodicity`), quindi `lib/metadata/dcat-ap-it.ts` è stato tolto. Da verificare in Fase 5 col diff dei feed
+- [x] etichetta del filtro da `NAMESPACE_TYPE` (PR #13) → quella di upstream (#1674), presa nel merge
 → verifica: `grep -rn "/portaljs" lib pages components scripts` restituisce solo `next.config.js`; feed DCAT generati uguali a quelli di oggi, a parte le differenze attese (diff di `out/catalog*.ttl` prima e dopo)
 
 ### Fase 4 - Italiano

@@ -16,10 +16,9 @@ import {
 } from '../../lib/datasets'
 import { provider } from '../../lib/providers'
 import { withHistory } from '../../lib/history'
-import { formatDate } from '../../lib/format'
 import { isSimpleChart } from '../../lib/views'
 import { datasetThemes } from '../../lib/data-themes'
-import { formatNumber, t, tn } from '../../lib/i18n'
+import { formatDate, formatNumber, t, tn } from '../../lib/i18n'
 
 // DuckDB only runs in the browser, so load the query view client-side. The chunk
 // (and DuckDB-Wasm) is only fetched when a resource actually needs it — flat
@@ -83,7 +82,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
 // portal activity feed and a Views slot — beside a metadata sidebar with the
 // primary download.
 export default function DatasetPage({ dataset, resources, activity }: PageProps) {
-  const namespaceLabel = NAMESPACE_TYPE === 'owner' ? t('dataset.owner') : t('dataset.theme')
+  const namespaceLabel = t(NAMESPACE_TYPE === 'owner' ? 'dataset.owner' : 'dataset.theme')
   const primary = resources[0]
   // The two serverless geo tiers render as ONE map (see MapPreview): the PMTiles
   // archive is the render layer, the GeoParquet twin is the query engine bound to
@@ -200,7 +199,7 @@ export default function DatasetPage({ dataset, resources, activity }: PageProps)
             ) : (
               <div className="border border-ink/[0.15] p-11 text-center">
                 <div className="mb-2 font-serif text-[17px] italic text-ink/55">
-                  {t('dataset.noViews')}
+                  {t('dataset.viewsEmpty')}
                 </div>
                 <div className="font-sans text-xs text-ink/40">
                   {t('dataset.viewsHint')}
@@ -212,7 +211,7 @@ export default function DatasetPage({ dataset, resources, activity }: PageProps)
             {((dataset.licenses && dataset.licenses.length > 0) ||
               (dataset.sources && dataset.sources.length > 0)) && (
               <section className="mt-11">
-                <SectionLabel>{t('dataset.sourcesLicense')}</SectionLabel>
+                <SectionLabel>{t('dataset.sourcesAndLicense')}</SectionLabel>
                 {dataset.sources && dataset.sources.length > 0 && (
                   <div className="mb-4">
                     <div className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-[0.08em] text-ink/45">
@@ -274,7 +273,7 @@ export default function DatasetPage({ dataset, resources, activity }: PageProps)
             )}
             <SidebarField
               label={t('dataset.resources')}
-              value={tn('dataset.files', resources.length)}
+              value={tn('dataset.fileCount', resources.length)}
             />
             {typeof dataset.recordCount === 'number' && (
               <SidebarField
@@ -373,7 +372,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       }}
       className="whitespace-nowrap font-sans text-[11px] font-medium text-ink/55 underline underline-offset-2 hover:text-accent"
     >
-      {copied ? t('dataset.copied') : label}
+      {copied ? t('download.copied') : label}
     </button>
   )
 }
@@ -393,7 +392,7 @@ function DownloadApiBlock({
   if (resources.length === 0) return null
   return (
     <section className="mt-11">
-      <SectionLabel>{t('dataset.downloadApi')}</SectionLabel>
+      <SectionLabel>{t('download.heading')}</SectionLabel>
       <div>
         {resources.map((r, i) => (
           <ResourceDownloadRow key={r.name + i} resource={r} />
@@ -401,12 +400,12 @@ function DownloadApiBlock({
       </div>
       {dualTier && (
         <p className="mt-3 font-sans text-xs leading-relaxed text-ink/45">
-          {t('dataset.dualTier')}{' '}
+          {t('download.dualTierNote')}{' '}
           <a
             href="https://portaljs.com"
             className="text-accent underline underline-offset-2"
           >
-            {t('dataset.howItWorks')}
+            {t('download.howThisWorks')}
           </a>
         </p>
       )}
@@ -453,13 +452,13 @@ function ResourceDownloadRow({ resource }: { resource: Resource }) {
             href={url}
             className="whitespace-nowrap font-sans text-[11px] font-medium text-ink/55 underline underline-offset-2 hover:text-accent"
           >
-            {t('common.download')}
+            {t('download.download')}
           </a>
-          {isPublicUrl && <CopyButton text={url} label={t('dataset.copyUrl')} />}
+          {isPublicUrl && <CopyButton text={url} label={t('download.copyUrl')} />}
           {isColumnar && isPublicUrl && (
             <CopyButton
               text={`SELECT * FROM read_parquet('${url}')`}
-              label={t('dataset.copySnippet')}
+              label={t('download.copyDuckdbSnippet')}
             />
           )}
           {history.length > 0 && (
@@ -468,7 +467,7 @@ function ResourceDownloadRow({ resource }: { resource: Resource }) {
               onClick={() => setOpen((v) => !v)}
               className="whitespace-nowrap font-sans text-[11px] font-medium text-ink/55 hover:text-accent"
             >
-              {open ? t('dataset.hideHistory') : t('dataset.history', { count: history.length })}
+              {open ? t('download.hideHistory') : t('download.history', { count: history.length })}
             </button>
           )}
         </div>
@@ -491,19 +490,19 @@ function ResourceDownloadRow({ resource }: { resource: Resource }) {
 function downloadCaption(format: string): string {
   switch (format) {
     case 'geoparquet':
-      return t('dataset.caption.columnar')
+      return t('download.caption.columnar')
     case 'pmtiles':
-      return t('dataset.caption.pmtiles')
+      return t('download.caption.pmtiles')
     case 'geojson':
-      return t('dataset.caption.geojson')
+      return t('download.caption.geojson')
     case 'parquet':
-      return t('dataset.caption.columnar')
+      return t('download.caption.columnar')
     case 'gpkg':
     case 'geopackage':
-      return t('dataset.caption.geopackage')
+      return t('download.caption.geopackage')
     case 'shp':
     case 'shapefile':
-      return t('dataset.caption.shapefile')
+      return t('download.caption.shapefile')
     default:
       return ''
   }
@@ -525,7 +524,7 @@ function VersionEntry({ version: v }: { version: ResourceVersion }) {
             href={v.downloadHref}
             className="whitespace-nowrap font-sans text-[11px] font-medium text-ink/55 underline underline-offset-2 hover:text-accent"
           >
-            {t('dataset.downloadVersion', { version: v.version })}
+            {t('download.downloadVersion', { version: v.version })}
           </a>
         )}
       </div>
@@ -543,7 +542,7 @@ function VersionEntry({ version: v }: { version: ResourceVersion }) {
             onClick={() => setShowDiff((s) => !s)}
             className="mt-1.5 font-sans text-[11px] font-medium text-accent underline underline-offset-2"
           >
-            {showDiff ? t('dataset.hideDiff') : t('dataset.viewDiff')}
+            {showDiff ? t('history.hideDiff') : t('history.viewDiff')}
           </button>
           {showDiff && (
             <div className="mt-2 border border-ink/[0.12] bg-cream-panel px-3.5 py-3">
@@ -577,14 +576,14 @@ function ActivityFeed({ activity }: { activity: ActivityEntry[] }) {
   return (
     <div className="mb-11">
       <div className="mb-3.5 flex items-baseline justify-between">
-        <SectionLabel className="mb-0">{t('dataset.activity')}</SectionLabel>
+        <SectionLabel className="mb-0">{t('activity.heading')}</SectionLabel>
         {hasMore && (
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
             className="font-sans text-xs font-medium text-accent underline underline-offset-2"
           >
-            {expanded ? t('dataset.showLess') : t('dataset.showAllActivity')}
+            {expanded ? t('activity.showLess') : t('activity.showAll')}
           </button>
         )}
       </div>
@@ -630,7 +629,7 @@ function GeoSection({
     <section className="mb-11">
       {showHeading && (
         <div className="mb-3 flex items-baseline gap-3">
-          <h2 className="font-serif text-xl font-semibold text-ink">{t('dataset.map')}</h2>
+          <h2 className="font-serif text-xl font-semibold text-ink">{t('map.heading')}</h2>
           <span className="border border-accent/50 px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-[0.06em] text-accent">
             {pmtilesResource && geoparquetResource
               ? 'pmtiles + geoparquet'
@@ -708,7 +707,7 @@ function ResourceSchema({ resource }: { resource: Resource }) {
   if (!resource.schema?.fields || resource.schema.fields.length === 0) return null
   return (
     <div className="mt-6">
-      <SectionLabel>{t('schema.title')}</SectionLabel>
+      <SectionLabel>{t('schema.heading')}</SectionLabel>
       <div className="overflow-x-auto border border-ink/[0.18]">
         <table data-ui="table" className="min-w-full border-collapse text-sm">
           <thead>
@@ -725,7 +724,7 @@ function ResourceSchema({ resource }: { resource: Resource }) {
               const tags = [
                 c?.required && t('schema.required'),
                 c?.unique && t('schema.unique'),
-                c?.enum && `enum(${c.enum.length})`,
+                c?.enum && t('schema.enum', { count: c.enum.length }),
               ].filter(Boolean) as string[]
               // Prefer the human field label (Frictionless `title` — e.g. the
               // ArcGIS field alias "Property Type") as the header, keeping the raw

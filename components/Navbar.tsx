@@ -10,6 +10,9 @@ import { t } from '../lib/i18n'
 // substituted by /portaljs-new-portal) set in Newsreader italic. Change the name
 // in your portal's metadata; swap the files in `public/` for your own marks. A
 // generated portal should not permanently wear the PortalJS name.
+//
+// UI text comes from locales/*.json via t() (lib/i18n.ts). The name token is in
+// double quotes so a substituted name containing an apostrophe stays valid.
 export default function Navbar() {
   return (
     <header className="border-b border-ink/[0.12] bg-cream">
@@ -17,7 +20,7 @@ export default function Navbar() {
         <Link
           href="/"
           className="font-serif text-[21px] font-medium italic text-ink no-underline"
-          aria-label={t('nav.homeAria', { name: 'PortalJS demo' })}
+          aria-label={t('nav.homeAria', { name: "PortalJS demo" })}
         >
           PortalJS demo
         </Link>

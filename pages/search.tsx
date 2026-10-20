@@ -3,10 +3,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import DebouncedInput from '../components/ui/DebouncedInput'
+import { withBasePath } from '../lib/basePath'
 import { NAMESPACE_TYPE, datasetHref, getResources, type Dataset } from '../lib/datasets'
 import { provider } from '../lib/providers'
 import { datasetThemes } from '../lib/data-themes'
-import { formatNumber, t, tn } from '../lib/i18n'
+import { formatNumber, t, tn, tx } from '../lib/i18n'
 
 export async function getStaticProps() {
   return { props: { datasets: await provider.listDatasets() } }
@@ -35,10 +36,14 @@ function truncate(s: string, max = 150): string {
 
 // Compact record count for the data-shape tile (3149 → "3.1k").
 function compact(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, '')}k`
+  const short = (v: number) => formatNumber(v, { maximumFractionDigits: 1, useGrouping: false })
+  if (n >= 1_000_000) return t('search.compactMillions', { n: short(n / 1_000_000) })
+  if (n >= 1_000) return t('search.compactThousands', { n: short(n / 1_000) })
   return String(n)
 }
+
+// Facet bucket for datasets without a category; always sorted last.
+const OTHER = t('search.categoryOther')
 
 // Field names for the "what's inside" chips, from the dataset-level schema or
 // the first resource that carries one.
@@ -48,7 +53,7 @@ function fieldNames(d: Dataset): string[] {
 }
 
 // Catalog surface: a borderless search line over a faceted result list.
-// Categories (and publishers, when the portal has more than one) live in a
+// Categories (and namespaces, when the portal has more than one) live in a
 // left sidebar as clickable filters with per-facet counts — filter without
 // scrolling — and every card leads with a data preview: a map snapshot for
 // geo datasets, a format + record-count shape tile for tabular ones.
@@ -83,7 +88,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
     )
   }, [datasets, query])
 
-  const catOf = (d: Dataset) => d.category ?? t('search.other')
+  const catOf = (d: Dataset) => d.category ?? OTHER
   const matchesCats = (d: Dataset) => activeCats.size === 0 || activeCats.has(catOf(d))
   const matchesNs = (d: Dataset) => activeNs.size === 0 || activeNs.has(d.namespace)
   // A dataset can have several themes: it matches when any of them is selected.
@@ -99,7 +104,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
   // Facet options with counts. Each group's counts are taken over the list
   // filtered by the query AND the OTHER group (standard faceted counting), so
   // a selection never zeroes out its own alternatives. Categories only appear
-  // when the catalog uses them; the publisher group only when there are
+  // when the catalog uses them; the namespace group only when there are
   // several namespaces to choose between.
   const catFacets = useMemo(() => {
     if (!datasets.some((d) => d.category)) return null
@@ -107,7 +112,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
     for (const d of searched.filter((d) => matchesNs(d) && matchesThemes(d)))
       counts.set(catOf(d), (counts.get(catOf(d)) ?? 0) + 1)
     return Array.from(counts.entries()).sort(([a], [b]) =>
-      a === t('search.other') ? 1 : b === t('search.other') ? -1 : a.localeCompare(b)
+      a === OTHER ? 1 : b === OTHER ? -1 : a.localeCompare(b)
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasets, searched, activeNs, activeThemes])
@@ -143,7 +148,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
   return (
     <>
       <Head>
-        <title>{`${t('nav.search')} — PortalJS demo`}</title>
+        <title>{t('search.pageTitle', { name: "PortalJS demo" })}</title>
       </Head>
       <main
         data-ui="page"
@@ -153,24 +158,24 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
           <Link href="/" className="text-inherit no-underline hover:text-accent">
             {t('nav.home')}
           </Link>
-          <span className="text-ink"> / {t('nav.search')}</span>
+          <span className="text-ink">{` / ${t('nav.search')}`}</span>
         </nav>
 
         <div className="flex items-baseline gap-4 pb-6 pt-9">
           <h1 className="font-serif text-[42px] font-semibold text-ink">{t('search.heading')}</h1>
           {datasets.length > 0 && (
             <span className="font-sans text-[13px] font-medium text-ink/50">
-              {tn('search.results', filtered.length)}
+              {tn('search.resultCount', filtered.length)}
             </span>
           )}
         </div>
 
         {datasets.length === 0 ? (
           <div className="py-10 font-serif text-[17px] italic text-ink/55">
-            {t('search.empty.before')}{' '}
-            <code className="font-mono not-italic">datasets.json</code>{' '}
-            {t('search.empty.middle')}{' '}
-            <code className="font-mono not-italic">public/data</code>.
+            {tx('search.emptyCatalog', {
+              manifest: <code className="font-mono not-italic">datasets.json</code>,
+              dataDir: <code className="font-mono not-italic">public/data</code>,
+            })}
           </div>
         ) : (
           <div className={hasFacets ? 'lg:grid lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-12' : ''}>
@@ -178,7 +183,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
               <aside className="pt-4">
                 {catFacets && (
                   <FacetGroup
-                    title={t('search.categories')}
+                    title={t('search.facets.categories')}
                     options={catFacets}
                     active={activeCats}
                     onToggle={(v) => toggle(activeCats, v, setActiveCats)}
@@ -187,7 +192,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
                 )}
                 {themeFacets && (
                   <FacetGroup
-                    title={t('search.themes')}
+                    title={t('search.facets.themes')}
                     options={themeFacets}
                     active={activeThemes}
                     onToggle={(v) => toggle(activeThemes, v, setActiveThemes)}
@@ -196,7 +201,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
                 )}
                 {nsFacets && (
                   <FacetGroup
-                    title={NAMESPACE_TYPE === 'owner' ? t('search.publishers') : t('search.themes')}
+                    title={t(NAMESPACE_TYPE === 'owner' ? 'search.facets.publishers' : 'search.facets.themes')}
                     options={nsFacets}
                     active={activeNs}
                     onToggle={(v) => toggle(activeNs, v, setActiveNs)}
@@ -210,13 +215,15 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
               <DebouncedInput
                 value={query}
                 onChange={(v) => setQuery(String(v))}
-                placeholder={t('home.searchPlaceholder')}
-                aria-label={t('home.searchLabel')}
+                placeholder={t('search.placeholder')}
+                aria-label={t('search.ariaLabel')}
                 className="w-full border-0 border-b border-ink/30 bg-transparent pb-3.5 font-serif text-lg italic text-ink placeholder:text-ink/40 focus:border-accent focus:outline-none"
               />
               {filtered.length === 0 ? (
                 <div className="py-10 font-serif text-[17px] italic text-ink/55">
-                  {query ? t('search.noResultsQuery', { query }) : t('search.noResultsFilters')}
+                  {query
+                    ? t('search.noResultsForQuery', { query })
+                    : t('search.noResultsForFilters')}
                 </div>
               ) : (
                 <div data-ui="dataset-list" className="pt-2">
@@ -260,7 +267,7 @@ function FacetGroup({
             onClick={onClear}
             className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[11px] font-medium text-accent hover:underline"
           >
-            {t('common.clear')}
+            {t('search.facets.clear')}
           </button>
         )}
       </div>
@@ -295,7 +302,7 @@ function FacetGroup({
 // data shape instead. A geo dataset that lacks a snapshot gets a plain "geo"
 // label rather than an implementation format name like "pmtiles".
 function ShapeTile({ ds }: { ds: Dataset }) {
-  const format = isGeo(ds) ? 'geo' : getResources(ds)[0]?.format
+  const format = isGeo(ds) ? t('search.geoFormat') : getResources(ds)[0]?.format
   return (
     <div className="flex h-14 w-14 flex-shrink-0 flex-col items-center justify-center self-center border border-ink/[0.15] bg-cream-panel">
       {format && (
@@ -327,10 +334,11 @@ function DatasetRow({ ds }: { ds: Dataset }) {
     >
       {geo && ds.thumbnail ? (
         // Plain <img>: the portal builds to a static export, so next/image has
-        // no optimizer to run through — and the thumbnail is already tiny.
+        // no optimizer to run through — and the thumbnail is already tiny. A
+        // plain <img> doesn't add the basePath to a site path, so we do.
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={ds.thumbnail}
+          src={withBasePath(ds.thumbnail)}
           alt=""
           loading="lazy"
           className="h-14 w-14 flex-shrink-0 self-center border border-ink/[0.15] object-cover"
@@ -351,7 +359,9 @@ function DatasetRow({ ds }: { ds: Dataset }) {
           <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-1 font-sans text-[11px] text-ink/45">
             {typeof ds.recordCount === 'number' && (
               <span className="font-medium tabular-nums">
-                {tn(geo ? 'search.features' : 'search.records', ds.recordCount)}
+                {tn(geo ? 'search.featureCount' : 'search.recordCount', ds.recordCount, {
+                  count: formatNumber(ds.recordCount),
+                })}
               </span>
             )}
             {fields.slice(0, 3).map((f) => (
@@ -362,7 +372,9 @@ function DatasetRow({ ds }: { ds: Dataset }) {
                 {f}
               </span>
             ))}
-            {fields.length > 3 && <span>{t('search.moreFields', { count: formatNumber(fields.length - 3) })}</span>}
+            {fields.length > 3 && (
+              <span>{t('search.moreFields', { count: fields.length - 3 })}</span>
+            )}
           </div>
         )}
       </div>

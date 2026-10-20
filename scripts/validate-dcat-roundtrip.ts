@@ -16,9 +16,9 @@ function norm(s?: string) {
   return (s ?? '').trim()
 }
 
-async function roundTrip(fmt: 'ttl' | 'jsonld') {
+async function roundTrip(fmt: 'ttl' | 'jsonld', profile = 'dcat-ap') {
   const src = (await provider.listDatasets()) as CatalogEntry[]
-  const text = await readFile(join(DIR, `dcat-ap.${fmt}`), 'utf8')
+  const text = await readFile(join(DIR, `${profile}.${fmt}`), 'utf8')
   const res = harvest(text, { format: fmt === 'jsonld' ? 'jsonld' : 'ttl' })
   const problems: string[] = []
 
@@ -51,12 +51,18 @@ async function roundTrip(fmt: 'ttl' | 'jsonld') {
       if (norm(gotFormat) !== norm(s.format))
         problems.push(`${title}: format "${gotFormat}" != "${s.format}"`)
     }
+    // Every file/resource round-trips as its own distribution (#1669) — a
+    // multi-resource dataset must not collapse to one or fall back to its landing page.
+    const wantDists = new Set([...(s.file ? [s.file] : []), ...(s.resources ?? []).map((r) => r.path)]).size
+    const gotDists = h.resources.filter((r) => r.name !== 'landing page').length
+    if (gotDists !== wantDists)
+      problems.push(`${title}: ${gotDists} distribution(s) harvested, want ${wantDists}`)
     // sources
     const srcSources = (s.sources ?? []).map((x) => x.path ?? x.title).filter(Boolean).length
     if (srcSources && !(h.sources?.length)) problems.push(`${title}: sources lost`)
   }
 
-  console.log(`\n=== round-trip via ${fmt.toUpperCase()} ===`)
+  console.log(`\n=== round-trip ${profile} via ${fmt.toUpperCase()} ===`)
   console.log(`  harvested ${res.datasets.length}/${src.length} datasets; profiles=[${res.profiles.join(', ')}]`)
   if (problems.length) {
     console.log(`  ✗ ${problems.length} field-loss issue(s):`)
@@ -95,9 +101,12 @@ async function realExternal() {
 async function main() {
   const a = await roundTrip('ttl')
   const b = await roundTrip('jsonld')
+  // DCAT-AP_IT (#1668) — same shared fields must survive its feed too.
+  const d = await roundTrip('ttl', 'dcat-ap-it')
+  const e = await roundTrip('jsonld', 'dcat-ap-it')
   const c = await realExternal()
-  console.log(`\n${a && b && c ? '✓ ALL round-trip + external checks passed' : '✗ some checks failed'}`)
-  if (!(a && b)) process.exit(1)
+  console.log(`\n${a && b && c && d && e ? '✓ ALL round-trip + external checks passed' : '✗ some checks failed'}`)
+  if (!(a && b && d && e)) process.exit(1)
 }
 
 main().catch((e) => {

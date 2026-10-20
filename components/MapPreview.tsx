@@ -19,8 +19,8 @@ import {
 } from '../lib/query/logical'
 import MapQueryPanel from './MapQueryPanel'
 import { resourceUrl, type Resource } from '../lib/datasets'
-import { themeConfig } from '../lib/theme'
 import { t } from '../lib/i18n'
+import { themeConfig } from '../lib/theme'
 
 // The dataset-page map — ONE MapLibre instance that carries both serverless geo
 // tiers of a dataset:
@@ -376,7 +376,7 @@ export default function MapPreview({
           }
         } catch {
           if (!cancelled) {
-            setError(t('map.pmtilesError', { url }))
+            setError(t('map.errors.pmtiles', { url }))
             setLoading(false)
           }
           return
@@ -418,7 +418,7 @@ export default function MapPreview({
         // Most commonly WebGL being unavailable (old hardware, disabled in
         // the browser) — say so instead of a generic failure.
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : t('map.initError'))
+          setError(e instanceof Error ? e.message : t('map.errors.init'))
           setLoading(false)
         }
         return
@@ -592,7 +592,7 @@ export default function MapPreview({
       })
     })().catch(() => {
       if (!cancelled) {
-        setError(t('map.libsError'))
+        setError(t('map.errors.libraries'))
         setLoading(false)
       }
     })
@@ -644,11 +644,11 @@ export default function MapPreview({
     <div>
       <div className="mb-3.5 flex flex-wrap items-center gap-3">
         <span className="font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-ink/45">
-          {t('dataset.map')}
+          {t('map.heading')}
         </span>
         {url && (
           <span
-            title={t('map.pmtilesTitle')}
+            title={t('map.pmtilesTooltip')}
             className="border border-accent/50 px-1.5 py-0.5 font-sans text-[10px] font-medium uppercase tracking-[0.06em] text-accent"
           >
             {t('map.pmtilesBadge')}
@@ -656,7 +656,7 @@ export default function MapPreview({
         )}
         {queryResource && ranged && (
           <span
-            title={t('map.geoparquetTitle')}
+            title={t('map.geoparquetTooltip')}
             style={{ color: HIGHLIGHT, borderColor: `rgba(${themeConfig.map.highlightRgb},0.5)` }}
             className="border px-1.5 py-0.5 font-sans text-[10px] font-medium uppercase tracking-[0.06em]"
           >
@@ -693,8 +693,8 @@ export default function MapPreview({
           </button>
           <button
             type="button"
-            aria-label={t('map.reset')}
-            title={t('map.reset')}
+            aria-label={t('map.resetExtent')}
+            title={t('map.resetExtent')}
             onClick={resetExtent}
             className="mt-px flex h-7 w-7 items-center justify-center border border-ink/25 bg-cream font-sans text-[13px] leading-none text-ink hover:text-accent"
           >
@@ -776,7 +776,7 @@ export default function MapPreview({
         <MapQueryPanel columns={logicalColumns} totalRows={totalRows} run={runLogical} clear={clearOverlay} />
       ) : (
         <div className="mt-2 font-mono text-[11px] text-ink/40">
-          {t('map.hint')}
+          {t('map.inspectHint')}
         </div>
       )}
     </div>

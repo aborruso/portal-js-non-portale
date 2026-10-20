@@ -74,7 +74,7 @@ export function Table({ data: initialData = [], cols: initialCols = [], csv = ''
     setError(null)
     fetch(url)
       .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status} — ${r.statusText}`)
+        if (!r.ok) throw new Error(t('table.httpError', { status: r.status, statusText: r.statusText }))
         return r.text()
       })
       .then((text) => {
@@ -130,7 +130,7 @@ export function Table({ data: initialData = [], cols: initialCols = [], csv = ''
           value={globalFilter}
           onChange={(v) => setGlobalFilter(String(v))}
           className="w-[190px] border-0 border-b border-ink/30 bg-transparent pb-1.5 font-serif text-sm italic text-ink placeholder:text-ink/40 focus:border-accent focus:outline-none"
-          placeholder={t('table.searchAll')}
+          placeholder={t('table.searchPlaceholder')}
         />
       </div>
       <div className="overflow-x-auto border border-ink/[0.18]">
@@ -187,7 +187,10 @@ export function Table({ data: initialData = [], cols: initialCols = [], csv = ''
               </button>
             ))}
             <span className="ml-1">
-              {t('table.page', { page: table.getState().pagination.pageIndex + 1, pages: table.getPageCount() })}
+              {t('table.page', {
+                page: table.getState().pagination.pageIndex + 1,
+                pages: table.getPageCount(),
+              })}
             </span>
           </span>
         )}
