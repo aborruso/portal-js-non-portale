@@ -57,6 +57,7 @@
   "dataset.sourcesAndLicense": "Sources & license",
   "dataset.sources": "Sources",
   "dataset.license": "License",
+  "dataset.themes": "Themes",
 
   "download.heading": "Download & API",
   "download.dualTierNote": "Rendered from PMTiles, queried in-browser from GeoParquet — no server.",
@@ -180,5 +181,15 @@
   "errors.unknownTable": "Unknown table “{name}”. The data is in a table called “data”.",
   "errors.typeMismatch": "Type mismatch — a value doesn't match its column's type. Check that numbers aren't quoted and text values are. ({detail})",
   "errors.unknownFunction": "Unknown function or wrong argument types. {detail}",
-  "errors.syntax": "SQL syntax error. {detail}"
+  "errors.syntax": "SQL syntax error. {detail}",
+
+  "csv.error": "CSV parse error — {detail}",
+  "csv.noRows": "no rows parsed",
+  "csv.row": "row {row}: {message}",
+
+  "footer.catalog": "Catalog",
+  "footer.dcatApItFeed": "DCAT-AP_IT feed",
+  "footer.dcatFeed": "DCAT feed",
+  "footer.poweredBy": "Built with",
+  "footer.publisher": "Publisher"
 }

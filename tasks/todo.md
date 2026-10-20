@@ -38,20 +38,20 @@ rm -rf "$tmp/portal-js-non-portale"; npx -y create-portaljs@0.7.0 "$tmp/portal-j
 → verifica: nessun marcatore di conflitto (`git diff --check`), `npx tsc --noEmit` pulito. Fatto: entrambi puliti
 
 ### Fase 3 - Togliere le correzioni superflue
-- [ ] `/portaljs` scritto a mano in `pages/_document.tsx` e `lib/datasets.ts` → `withBasePath()` di upstream
+- [x] `/portaljs` scritto a mano in `pages/_document.tsx` e `lib/datasets.ts` → `withBasePath()` di upstream (nel merge); anche `components/themes/italia/Footer.tsx` passa a `withBasePath`
 - [x] correzione della PR #10 (`catalog-feeds.json` con basePath) → quella di upstream (#1675): `scripts/generate-dcat.ts` preso da upstream nel merge
 - [x] correzione della PR #7 sulle distribuzioni (`toDCAT` in `lib/metadata/dcat.ts`) → quella di upstream (#1677); il profilo DCAT-AP_IT locale (`lib/metadata/dcat-ap-it.ts`) va confrontato con quello di upstream (#1678) e si decide se tenerlo (domanda 3). Fatto nel merge: `dcat.ts`, `dcat-validate.ts` da upstream; upstream ha il profilo `dcat-ap-it` in `dcat-profiles.ts` con gli stessi campi (`publisher.identifier`, `rightsHolder`, `accrualPeriodicity`), quindi `lib/metadata/dcat-ap-it.ts` è stato tolto. Da verificare in Fase 5 col diff dei feed
 - [x] etichetta del filtro da `NAMESPACE_TYPE` (PR #13) → quella di upstream (#1674), presa nel merge
 → verifica: `grep -rn "/portaljs" lib pages components scripts` restituisce solo `next.config.js`; feed DCAT generati uguali a quelli di oggi, a parte le differenze attese (diff di `out/catalog*.ttl` prima e dopo)
 
 ### Fase 4 - Italiano
-- [ ] `locales/it.json` con le chiavi di `en.json` di upstream: le 141 traduzioni che coincidono per testo si riprendono dal nostro `it.json`, le altre si traducono
-- [ ] Le chiavi usate solo da file nostri (`DatasetViews.tsx`, `themes/italia/*`, `lib/theme.ts`) entrano in `en.json` e in `it.json`
-- [ ] `LOCALES = { en, it }` in `lib/i18n.ts`, `DEFAULT_LOCALE = 'it'`
+- [x] `locales/it.json` con le chiavi di `en.json` di upstream: le 141 traduzioni che coincidono per testo si riprendono dal nostro `it.json`, le altre si traducono. Fatto: 141 riprese, 26 tradotte
+- [x] Le chiavi usate solo da file nostri (`DatasetViews.tsx`, `themes/italia/*`, `lib/theme.ts`) entrano in `en.json` e in `it.json`: 9 chiavi (`csv.*`, `footer.*`, `dataset.themes`), aggiunte senza cambiare la forma del file di upstream
+- [x] `LOCALES = { en, it }` in `lib/i18n.ts`, `DEFAULT_LOCALE = 'it'`. `npm run i18n:check`: OK, 175 chiavi (avviso solo sulle forme `.many`, che ripiegano su `.other`)
 → verifica: `npm run i18n:check` passa; stesso numero di chiavi in `en.json` e `it.json`; nessun avviso `[i18n] missing key` con `npm run dev` sulle pagine home, ricerca, scheda
 
 ### Fase 5 - Build e percorsi
-- [ ] `npm run build` in locale
+- [x] `npm run build` in locale: verde il 2026-10-20; nessun percorso fuori da `/portaljs/`; `<html lang="it" data-theme="italia">`. Feed: `dcat-3` guadagna le descrizioni delle distribuzioni; DCAT-AP_IT di upstream con `dcat-ap-it-generator validate` 0 errori e 16 warning (oggi 0 e 22), ma i temi non sono più `skos:Concept` con `skos:prefLabel` italiana (regole 167/169). Da decidere con Andrea. Prova a mano con `npx serve` ancora da fare
 → verifica: build verde; il controllo di `deploy.yml` lanciato in locale su `out/` non trova riferimenti fuori da `/portaljs/`; `out/index.html` ha `<html lang="it"`; prova a mano con `npx serve` sotto `/portaljs/` di home, ricerca, una scheda con mappa e una con grafico
 
 ### Fase 6 - Documentazione

@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import dcatConfig from '../../../dcat.config.json'
+import { withBasePath } from '../../../lib/basePath'
 import { t } from '../../../lib/i18n'
 
 // Footer of the «italia» theme: the two bands of the Design System Italia footer
 // (main in the primary colour, legal in the dark blue). Structure and sizes follow
-// italia/italia-tailwind-ui (footer.css). Hand-written paths carry the /portaljs
-// base path (see README).
+// italia/italia-tailwind-ui (footer.css). Plain <a> hrefs to site files go
+// through withBasePath, like pages/_document.tsx.
 const CONTAINER = 'mx-auto w-full max-w-[1320px] px-4'
 const LINK = 'text-sm text-white underline decoration-white/50 decoration-1 underline-offset-[3px] hover:decoration-white'
 
@@ -29,12 +30,12 @@ export default function ItaliaFooter() {
                   </Link>
                 </li>
                 <li>
-                  <a href="/portaljs/catalog.jsonld" className={LINK}>
+                  <a href={withBasePath('/catalog.jsonld')} className={LINK}>
                     {t('footer.dcatFeed')}
                   </a>
                 </li>
                 <li>
-                  <a href="/portaljs/catalog.dcat-ap-it.ttl" className={LINK}>
+                  <a href={withBasePath('/catalog.dcat-ap-it.ttl')} className={LINK}>
                     {t('footer.dcatApItFeed')}
                   </a>
                 </li>
