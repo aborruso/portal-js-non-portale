@@ -26,9 +26,9 @@
 // https://semiceu.github.io/DCAT-AP/ · DCAT-US
 // https://doi-do.github.io/dcat-us/ (aligns Project Open Data v1.1).
 
-import type { CatalogEntry, DcatCatalog } from './dcat'
+import { resolveResourceUrl, type CatalogEntry, type DcatCatalog } from './dcat'
 import type { RdfFormat } from './dcat-rdf'
-import type { Field } from './types'
+import type { ResourceDescriptor } from './types'
 
 // A JSON-LD node with prefixed keys ('dct:title', '@type', …). Loose on purpose:
 // profiles add properties beyond dcat.ts's typed DcatDataset shape.
@@ -49,6 +49,11 @@ export type DcatAgent = {
   uri?: string
   // foaf:Organization (default) or foaf:Person.
   type?: 'foaf:Organization' | 'foaf:Person'
+  // The agent's dct:identifier. Only the dcat-ap-it profile emits it: DCAT-AP_IT makes
+  // it mandatory on every dcatapit:Agent — the IPA code (Indice della Pubblica
+  // Amministrazione) for a public administration, the VAT number (Partita IVA) for a
+  // private organization. Other profiles ignore it, so setting it never changes them.
+  identifier?: string
 }
 
 // A point of contact (dcat:contactPoint). Rendered as a vcard:Kind node.
@@ -82,6 +87,9 @@ export type DcatConfig = {
   // Catalog-wide GeoDCAT-AP spatial coverage applied to every dataset that declares
   // none of its own (e.g. the extent of the whole catalog).
   spatial?: DcatSpatial
+  // Default dct:accrualPeriodicity (dcat-ap-it only) for datasets that declare none:
+  // an EU frequency IRI or its bare token ("ANNUAL", "IRREG", …). Unset → UNKNOWN.
+  accrualPeriodicity?: string
 }
 
 // A pluggable DCAT application profile.
@@ -125,6 +133,8 @@ const NS = {
   // DCAT-AP application-profile terms (dcat:spatialResolutionInMeters lives in dcat,
   // but availability/etc. are dcatap: — declared so a richer profile can grow here).
   dcatap: 'http://data.europa.eu/r5r/',
+  // DCAT-AP_IT — the Italian national profile (AgID / dati.gov.it).
+  dcatapit: 'http://dati.gov.it/onto/dcatapit#',
 }
 
 function agentNode(a?: DcatAgent): JsonLdNode | undefined {
@@ -158,6 +168,16 @@ type DatasetOverrides = {
   accessLevel?: DcatConfig['accessLevel']
   // GeoDCAT-AP spatial coverage for this dataset (read by the geodcat-ap profile).
   spatial?: DcatSpatial
+  // DCAT-AP_IT (read by the dcat-ap-it profile only):
+  //   rightsHolder        — dct:rightsHolder, the organization responsible for the
+  //                         dataset (name + identifier; defaults to the dataset's
+  //                         publisher override, else the catalog publisher).
+  //   accrualPeriodicity  — dct:accrualPeriodicity, an EU frequency IRI or token.
+  //   identifier          — the full dct:identifier ("<IPA code>:<local id>") when the
+  //                         national catalog assigned one; else it is derived.
+  rightsHolder?: DcatAgent
+  accrualPeriodicity?: string
+  identifier?: string
 }
 
 // GeoDCAT-AP spatial coverage. Authored per-dataset on the manifest's `dcat` override
@@ -350,6 +370,231 @@ export const geodcatApProfile: DcatProfile = {
   },
 }
 
+// --- DCAT-AP_IT (Italian national profile, AgID / dati.gov.it) ------------------
+
+// DCAT-AP_IT is the Italian extension of DCAT-AP, harvested by dati.gov.it. Spec:
+// https://docs.italia.it/italia/daf/linee-guida-cataloghi-dati-dcat-ap-it/it/stabile/dcat-ap_it.html
+// · ontology http://dati.gov.it/onto/dcatapit. Beyond DCAT-AP it requires (table
+// "Overview profilo"):
+//   Catalog       dcatapit:Catalog — dct:title, dct:description, dct:publisher,
+//                 dct:modified, dcat:dataset
+//   Dataset       dcatapit:Dataset — dct:identifier ("<IPA code>:<local id>"),
+//                 dct:title, dct:description, dct:modified, dcat:theme (EU data-theme),
+//                 dct:rightsHolder, dct:accrualPeriodicity (EU frequency),
+//                 dcat:distribution (for open data)
+//   Distribution  dcatapit:Distribution — dct:format (EU file-type), dcat:accessURL,
+//                 dct:license (a dcatapit:LicenseDocument)
+//   Agent         dcatapit:Agent — dct:identifier (IPA code / VAT number), foaf:name
+//   Contact point dcatapit:Organization (recommended) — vcard:fn, vcard:hasEmail
+// The AgID validator rules also type the objects it can see: dcat:landingPage and the
+// catalog foaf:homepage must be foaf:Document, so a dataset's own IRI must differ from
+// its landing page (the base uses the landing page as the dataset @id).
+
+const EU_FILE_TYPE = 'http://publications.europa.eu/resource/authority/file-type/'
+const EU_FREQUENCY = 'http://publications.europa.eu/resource/authority/frequency/'
+const EU_DATA_THEME = 'http://publications.europa.eu/resource/authority/data-theme'
+const ADMS_LICENCE_TYPE = 'http://purl.org/adms/licencetype/'
+
+// Formats with no term in the EU file-type authority table (which AgID makes
+// mandatory for dct:format) → the closest term that exists. GeoParquet, Parquet,
+// GeoJSON, CSV, … are in the table and pass through unchanged.
+const IT_FORMAT_FALLBACK: Record<string, string> = {
+  PMTILES: 'BIN', // "Binary Data" — no PMTiles term in the EU vocabulary
+}
+
+// Well-known licences → the name and ADMS licence type (dct:type, recommended on a
+// dcatapit:LicenseDocument). SPDX ids resolve to the licence's IRI, since
+// dct:license must be an IRI. Unknown licences are emitted without a dct:type (a
+// warning in the AgID validator, not an error).
+const KNOWN_LICENCES: { test: RegExp; spdx?: string; iri: string; name: string; type: string }[] = [
+  { test: /creativecommons\.org\/publicdomain\/zero\/1\.0/i, spdx: 'CC0-1.0', iri: 'https://creativecommons.org/publicdomain/zero/1.0/', name: 'CC0 1.0', type: 'PublicDomain' },
+  { test: /creativecommons\.org\/licenses\/by\/4\.0/i, spdx: 'CC-BY-4.0', iri: 'https://creativecommons.org/licenses/by/4.0/', name: 'CC BY 4.0', type: 'Attribution' },
+  { test: /creativecommons\.org\/licenses\/by-sa\/4\.0/i, spdx: 'CC-BY-SA-4.0', iri: 'https://creativecommons.org/licenses/by-sa/4.0/', name: 'CC BY-SA 4.0', type: 'ViralEffect-ShareAlike' },
+  { test: /opendatacommons\.org\/licenses\/odbl\/1[-.]0/i, spdx: 'ODbL-1.0', iri: 'https://opendatacommons.org/licenses/odbl/1-0/', name: 'ODbL 1.0', type: 'ViralEffect-ShareAlike' },
+  { test: /opendatacommons\.org\/licenses\/pddl\/1[-.]0/i, spdx: 'PDDL-1.0', iri: 'https://opendatacommons.org/licenses/pddl/1-0/', name: 'PDDL 1.0', type: 'PublicDomain' },
+  { test: /opendatacommons\.org\/licenses\/by\/1[-.]0/i, spdx: 'ODC-By-1.0', iri: 'https://opendatacommons.org/licenses/by/1-0/', name: 'ODC-By 1.0', type: 'Attribution' },
+  { test: /authority\/licence\/CC_BY_4_0$/, iri: '', name: 'CC BY 4.0', type: 'Attribution' },
+  { test: /authority\/licence\/CC_BYSA_4_0$/, iri: '', name: 'CC BY-SA 4.0', type: 'ViralEffect-ShareAlike' },
+  { test: /authority\/licence\/CC0$/, iri: '', name: 'CC0 1.0', type: 'PublicDomain' },
+  { test: /authority\/licence\/ODC_BL$/, iri: '', name: 'ODbL 1.0', type: 'ViralEffect-ShareAlike' },
+  { test: /authority\/licence\/ODC_PDDL$/, iri: '', name: 'PDDL 1.0', type: 'PublicDomain' },
+  { test: /authority\/licence\/ODC_BY$/, iri: '', name: 'ODC-By 1.0', type: 'Attribution' },
+]
+
+const isIri = (v: string): boolean => /^[a-z][a-z0-9+.-]*:/i.test(v)
+
+// A licence value (IRI or SPDX id) → a dcatapit:LicenseDocument description, or
+// undefined when it can't be expressed as an IRI. An authored IRI is kept as-is.
+function itLicence(v: unknown): { iri: string; name?: string; type?: string } | undefined {
+  if (typeof v !== 'string' || !v.trim()) return undefined
+  if (isIri(v)) {
+    const hit = KNOWN_LICENCES.find((l) => l.test.test(v))
+    return { iri: v, name: hit?.name, type: hit?.type }
+  }
+  const hit = KNOWN_LICENCES.find((l) => l.spdx?.toLowerCase() === v.toLowerCase())
+  return hit ? { iri: hit.iri, name: hit.name, type: hit.type } : undefined
+}
+
+// An EU frequency IRI from an IRI or bare token. AgID allows …/frequency/UNKNOWN when
+// the update frequency isn't known, so that is the default.
+function frequencyIri(v?: string): string {
+  if (!v?.trim()) return `${EU_FREQUENCY}UNKNOWN`
+  return isIri(v) ? v : `${EU_FREQUENCY}${v.trim().toUpperCase()}`
+}
+
+// IRI-identified nodes (agents, licences, landing pages) are described once and
+// referenced by @id afterwards, so the same agent/licence isn't repeated in every
+// dataset (which would also trip the validator's max-cardinality checks on a naive
+// store). Blank nodes are always inlined.
+function describeOnce(seen: Set<string>, node: JsonLdNode): JsonLdNode {
+  const id = node['@id']
+  if (typeof id !== 'string') return node
+  if (seen.has(id)) return { '@id': id }
+  seen.add(id)
+  return node
+}
+
+// A dcatapit:Agent: dct:identifier + foaf:name are mandatory. Identified by its `uri`
+// when given, else a blank node — never by its homepage, because AgID requires
+// distinct objects (agent vs. homepage document) to have distinct IRIs.
+function itAgentNode(a: DcatAgent | undefined, seen: Set<string>): JsonLdNode | undefined {
+  if (!a?.name && !a?.identifier) return undefined
+  const node: JsonLdNode = { '@type': ['foaf:Agent', 'dcatapit:Agent'] }
+  if (a.uri) node['@id'] = a.uri
+  if (a.identifier) node['dct:identifier'] = a.identifier
+  if (a.name) node['foaf:name'] = a.name
+  if (a.homepage) node['foaf:homepage'] = a.homepage
+  if (a.mbox) node['foaf:mbox'] = a.mbox.startsWith('mailto:') ? a.mbox : `mailto:${a.mbox}`
+  return describeOnce(seen, node)
+}
+
+// A contact point as dcatapit:Organization (vcard:fn + vcard:hasEmail, both mandatory
+// when a contact point is given).
+function itContactNode(c?: DcatContact): JsonLdNode | undefined {
+  if (!c?.fn && !c?.email) return undefined
+  const node: JsonLdNode = { '@type': ['vcard:Organization', 'vcard:Kind', 'dcatapit:Organization'] }
+  if (c.fn) node['vcard:fn'] = c.fn
+  if (c.email) node['vcard:hasEmail'] = c.email.startsWith('mailto:') ? c.email : `mailto:${c.email}`
+  return node
+}
+
+function itLicenceNode(l: { iri: string; name?: string; type?: string }, seen: Set<string>): JsonLdNode {
+  const node: JsonLdNode = { '@id': l.iri, '@type': ['dct:LicenseDocument', 'dcatapit:LicenseDocument'] }
+  if (l.name) node['foaf:name'] = l.name
+  if (l.type) node['dct:type'] = { '@id': `${ADMS_LICENCE_TYPE}${l.type}` }
+  return describeOnce(seen, node)
+}
+
+function itDocumentNode(iri: string, seen: Set<string>): JsonLdNode {
+  return describeOnce(seen, { '@id': iri, '@type': 'foaf:Document' })
+}
+
+// DCAT-AP_IT — DCAT-AP plus the Italian mandatory classes/properties above. Opt-in:
+// listed in dcat.config.json `profiles` (or DCAT_PROFILES); no other feed changes.
+// Inputs: dcat.config.json `publisher.identifier` (IPA code), per-dataset `dcat`
+// overrides `rightsHolder`, `accrualPeriodicity`, `identifier` in datasets.json.
+export const dcatApItProfile: DcatProfile = {
+  id: 'dcat-ap-it',
+  label: 'DCAT-AP_IT (Italy, dati.gov.it)',
+  dcatVersion: '3',
+  conformsTo: 'http://dati.gov.it/onto/dcatapit',
+  context: { ...dcatApProfile.context, dcatapit: NS.dcatapit },
+  apply(base, cfg) {
+    // Read the per-dataset overrides BEFORE baseAugment strips the `_dcat` carrier.
+    // Positionally aligned with the output datasets.
+    const overrides = ((base['dcat:dataset'] ?? []) as JsonLdNode[]).map(overridesOf)
+    const catalog = baseAugment(base, cfg, this)
+    const seen = new Set<string>()
+
+    catalog['@type'] = ['dcat:Catalog', 'dcatapit:Catalog']
+    const ctx = catalog['@context'] as Record<string, unknown>
+    if (!ctx.foaf) ctx.foaf = NS.foaf
+    if (!ctx.vcard) ctx.vcard = NS.vcard
+    if (!ctx['dct:type']) ctx['dct:type'] = { '@type': '@id' }
+    if (!ctx['dct:rightsHolder']) ctx['dct:rightsHolder'] = { '@type': '@id' }
+    if (!ctx['foaf:homepage']) ctx['foaf:homepage'] = { '@type': '@id' }
+    if (!ctx['foaf:mbox']) ctx['foaf:mbox'] = { '@type': '@id' }
+    if (!ctx['vcard:hasEmail']) ctx['vcard:hasEmail'] = { '@type': '@id' }
+
+    const catPublisher = itAgentNode(cfg.publisher, seen)
+    if (catPublisher) catalog['dct:publisher'] = catPublisher
+    else delete catalog['dct:publisher']
+    if (cfg.homepage) catalog['foaf:homepage'] = itDocumentNode(cfg.homepage, seen)
+    // The catalog-level contact point isn't part of DCAT-AP_IT's Catalog; re-type it
+    // like the dataset ones so the graph stays consistent.
+    const catContact = itContactNode(cfg.contactPoint)
+    if (catContact) catalog['dcat:contactPoint'] = catContact
+
+    const catalogModified = catalog['dct:modified'] as string | undefined
+    const datasets = (catalog['dcat:dataset'] ?? []) as JsonLdNode[]
+    let usesEuThemes = false
+    catalog['dcat:dataset'] = datasets.map((raw, i) => {
+      const ov = overrides[i] ?? {}
+      const ds: JsonLdNode = { ...raw, '@type': ['dcat:Dataset', 'dcatapit:Dataset'] }
+
+      // The dataset's own IRI must differ from its landing page (a foaf:Document).
+      const landingPage = ds['dcat:landingPage'] as string | undefined
+      if (landingPage) {
+        if (ds['@id'] === landingPage) ds['@id'] = `${landingPage}#dataset`
+        ds['dcat:landingPage'] = itDocumentNode(landingPage, seen)
+      }
+
+      // dct:identifier "<IPA code>:<local id>": an explicit override wins, else the
+      // publisher's IPA code prefixes the portal's own id (namespace/slug).
+      const ipa = ov.publisher?.identifier ?? cfg.publisher?.identifier
+      if (ov.identifier) ds['dct:identifier'] = ov.identifier
+      else if (ipa && typeof ds['dct:identifier'] === 'string')
+        ds['dct:identifier'] = `${ipa}:${ds['dct:identifier']}`
+
+      // dct:modified is mandatory: the dataset's own date, else its issue date, else
+      // the catalog's modification date (the build time).
+      if (!ds['dct:modified']) {
+        const fallback = (ds['dct:issued'] as string | undefined) ?? catalogModified
+        if (fallback) ds['dct:modified'] = fallback
+      }
+
+      const publisher = itAgentNode(ov.publisher ?? cfg.publisher, seen)
+      if (publisher) ds['dct:publisher'] = publisher
+      else delete ds['dct:publisher']
+
+      const rightsHolder = itAgentNode(ov.rightsHolder ?? ov.publisher ?? cfg.publisher, seen)
+      if (rightsHolder) ds['dct:rightsHolder'] = rightsHolder
+
+      ds['dct:accrualPeriodicity'] = frequencyIri(ov.accrualPeriodicity ?? cfg.accrualPeriodicity)
+
+      const contact = itContactNode(ov.contactPoint ?? cfg.contactPoint)
+      if (contact) ds['dcat:contactPoint'] = contact
+      else delete ds['dcat:contactPoint']
+
+      const themes = ds['dcat:theme'] as string[] | undefined
+      if (themes?.some((t) => t.startsWith(EU_DATA_THEME))) usesEuThemes = true
+
+      // dct:license is mandatory on every distribution (DCAT-AP_IT moves it there);
+      // each one inherits the dataset licence (manifest licenses[0], else the
+      // catalog default from dcat.config.json `license`).
+      const licence = itLicence(ds['dct:license'])
+      if (licence) ds['dct:license'] = licence.iri
+      const dists = (ds['dcat:distribution'] ?? []) as JsonLdNode[]
+      if (dists.length)
+        ds['dcat:distribution'] = dists.map((d) => {
+          // New objects: base distributions are shared with every other profile.
+          const dist: JsonLdNode = { ...d, '@type': ['dcat:Distribution', 'dcatapit:Distribution'] }
+          const fmt = dist['dct:format']
+          if (typeof fmt === 'string' && fmt.startsWith(EU_FILE_TYPE)) {
+            const fallback = IT_FORMAT_FALLBACK[fmt.slice(EU_FILE_TYPE.length)]
+            if (fallback) dist['dct:format'] = `${EU_FILE_TYPE}${fallback}`
+          }
+          if (licence) dist['dct:license'] = itLicenceNode(licence, seen)
+          return dist
+        })
+      return ds
+    })
+
+    if (usesEuThemes && !catalog['dcat:themeTaxonomy']) catalog['dcat:themeTaxonomy'] = EU_DATA_THEME
+    return catalog
+  },
+}
+
 // --- Croissant (MLCommons, schema.org-based ML-dataset metadata) ----------------
 
 // Croissant is NOT a DCAT application profile — it's a schema.org JSON-LD vocabulary
@@ -436,11 +681,9 @@ const CROISSANT_DATATYPE: Record<string, string> = {
   any: 'sc:Text',
 }
 
-// A dataset's resource, uniformly whether it's a single-file dataset or a bundle.
-type CroissantResource = { path: string; format?: string; title?: string; description?: string; schema?: { fields?: Field[] } }
-
-function resourcesOf(entry: CroissantEntry): CroissantResource[] {
-  if (Array.isArray(entry.resources)) return entry.resources as CroissantResource[]
+// A dataset's resources, uniformly whether it's a single-file dataset or a bundle.
+function resourcesOf(entry: CroissantEntry): ResourceDescriptor[] {
+  if (Array.isArray(entry.resources)) return entry.resources
   if (entry.file) return [{ path: entry.file, format: entry.format, title: entry.title, schema: entry.schema }]
   return []
 }
@@ -448,8 +691,17 @@ function resourcesOf(entry: CroissantEntry): CroissantResource[] {
 // The subset of a manifest entry Croissant reads (plus the build-time file hashes the
 // generator attaches). Kept structural — the provider Dataset is assignable.
 type CroissantEntry = CatalogEntry & {
-  resources?: CroissantResource[]
   _hashes?: Record<string, string>
+}
+
+// The site base URL (SITE_URL) toDCATCatalog resolved this dataset's links against.
+// Profiles don't receive it, but the landing page is `<base>/@<namespace>/<slug>`, so
+// strip that suffix ('' for a root-relative feed). Undefined when the dataset has no
+// such landing page (e.g. no namespace/slug).
+function siteBaseOf(entry: CroissantEntry, url?: string): string | undefined {
+  if (!url || !entry.namespace || !entry.slug) return undefined
+  const suffix = `/@${entry.namespace}/${entry.slug}`
+  return url.endsWith(suffix) ? url.slice(0, -suffix.length) : undefined
 }
 
 // A valid Croissant/schema.org `name` token: [a-zA-Z0-9\-_\.]+
@@ -473,19 +725,17 @@ function croissantDataset(entry: CroissantEntry, baseDs: JsonLdNode): JsonLdNode
   const url = (baseDs['@id'] ?? baseDs['dcat:landingPage']) as string | undefined
   const origin = originOf(url) || originOf((baseDs['dcat:distribution'] as JsonLdNode[])?.[0]?.['dcat:downloadURL'])
   const name = croissantName((entry.namespace && entry.slug ? `${entry.namespace}_${entry.slug}` : entry.slug ?? entry.name ?? 'dataset'))
-  const baseDist = (baseDs['dcat:distribution'] as JsonLdNode[] | undefined) ?? []
+  // Resolve resource paths exactly as toDCAT resolved the base distributions'
+  // downloadURLs (absolute URLs as-is, bare filenames under <site>/data/).
+  const siteBase = siteBaseOf(entry, url) ?? origin
 
   const resources = resourcesOf(entry)
   const distribution: JsonLdNode[] = []
   const recordSet: JsonLdNode[] = []
 
-  resources.forEach((res, i) => {
+  resources.forEach((res) => {
     const foId = `${name}/${croissantName(res.path)}`
-    // Prefer the base distribution's resolved downloadURL (single-file datasets);
-    // else build from the dataset origin + /data/<path> (bundles).
-    const contentUrl =
-      (baseDist[i]?.['dcat:downloadURL'] as string | undefined) ??
-      (origin ? `${origin}/data/${res.path}` : `/data/${res.path}`)
+    const contentUrl = resolveResourceUrl(res.path, siteBase)
     const fo: JsonLdNode = {
       '@type': 'cr:FileObject',
       '@id': foId,
@@ -640,6 +890,7 @@ for (const p of [
   dcatApSeProfile,
   dcatApChProfile,
   dcatApDeProfile,
+  dcatApItProfile,
 ]) {
   register(p)
 }
