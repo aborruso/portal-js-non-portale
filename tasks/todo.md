@@ -51,12 +51,12 @@ rm -rf "$tmp/portal-js-non-portale"; npx -y create-portaljs@0.7.0 "$tmp/portal-j
 → verifica: `npm run i18n:check` passa; stesso numero di chiavi in `en.json` e `it.json`; nessun avviso `[i18n] missing key` con `npm run dev` sulle pagine home, ricerca, scheda
 
 ### Fase 5 - Build e percorsi
-- [x] `npm run build` in locale: verde il 2026-10-20; nessun percorso fuori da `/portaljs/`; `<html lang="it" data-theme="italia">`. Feed: `dcat-3` guadagna le descrizioni delle distribuzioni; DCAT-AP_IT di upstream con `dcat-ap-it-generator validate` 0 errori e 16 warning (oggi 0 e 22), ma i temi non sono più `skos:Concept` con `skos:prefLabel` italiana (regole 167/169). Da decidere con Andrea. Prova a mano con `npx serve` ancora da fare
+- [x] `npm run build` in locale: verde il 2026-10-20; nessun percorso fuori da `/portaljs/`; `<html lang="it" data-theme="italia">`. Feed: `dcat-3` guadagna le descrizioni delle distribuzioni; DCAT-AP_IT di upstream con `dcat-ap-it-generator validate` 0 errori e 16 warning (oggi 0 e 22), ma i temi non sono più `skos:Concept` con `skos:prefLabel` italiana (regole 167/169). Decisione: si tiene upstream (domanda 6). Prova nel browser (agent-browser, headless, `out/` servito sotto `/portaljs/`) di home, ricerca, CO2 (grafico), world-boundaries (mappa), country-codes (SQL): testo in italiano, `lang="it"`, tema italia, grafico, mappa e DuckDB caricati, nessun errore in console
 → verifica: build verde; il controllo di `deploy.yml` lanciato in locale su `out/` non trova riferimenti fuori da `/portaljs/`; `out/index.html` ha `<html lang="it"`; prova a mano con `npx serve` sotto `/portaljs/` di home, ricerca, una scheda con mappa e una con grafico
 
 ### Fase 6 - Documentazione
-- [ ] wiki: `panoramica.md` (0.7.0 @ `55f2385`, correzioni per `/portaljs/` che non servono più), `lingua.md` (`LOCALES`, `DEFAULT_LOCALE`, `i18n:check`), `aggiornare-il-template.md` (Node e scaffold), `log.md`
-→ verifica: nessun riferimento a `DICTIONARIES` o `NEXT_PUBLIC_LOCALE` come impostazione principale (`grep -rn DICTIONARIES wiki`)
+- [x] wiki: `panoramica.md` (0.7.0 @ `55f2385`, correzioni per `/portaljs/` che non servono più), `lingua.md` (`LOCALES`, `DEFAULT_LOCALE`, `i18n:check`), `aggiornare-il-template.md` (Node e scaffold), `log.md`
+→ verifica: nessun riferimento a `DICTIONARIES` o `NEXT_PUBLIC_LOCALE` come impostazione principale (`grep -rn DICTIONARIES wiki`). Fatto il 2026-10-20: aggiornati anche `dcat.md` (profilo del template, temi) e `log.md`; grep pulito
 
 ### Fase 7 - Pubblicazione (solo dopo conferma di Andrea)
 - [ ] PR da `template-0.7.0`, merge, `git push origin upstream`
@@ -71,6 +71,7 @@ rm -rf "$tmp/portal-js-non-portale"; npx -y create-portaljs@0.7.0 "$tmp/portal-j
 3. Profilo DCAT-AP_IT: se quello di upstream (#1678) fa le stesse cose, togliamo il nostro `dcat-ap-it.ts`, o lo teniamo finché non si confronta il feed col validatore AgID?
 4. `upstream` senza `--namespace` (resta `theme` come il template, `owner` resta modifica nostra): ok?
 5. `it.json` anche a datopian/portaljs come PR? È un contributo, non un difetto.
+6. Temi nel feed DCAT-AP_IT: upstream li scrive come URI semplici, il nostro profilo come `skos:Concept` con `skos:prefLabel` italiana. Decisione di Andrea (2026-10-20): si tiene upstream; la issue su datopian/portaljs si apre dopo la risposta di Rotundo (AgID) su quali regole applica il validatore online (167 avviso, una sola volta per catalogo; 169 errore, solo sui temi `skos:Concept` senza etichetta). Sollecito inviato il 2026-10-20 nel thread «Validatore DCAT-AP_IT: quali regole applica il servizio online»
 
 # Archivio
 
