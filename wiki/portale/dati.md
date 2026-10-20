@@ -18,7 +18,7 @@ sources:
 
 # Come funziona
 
-Ogni dataset è una voce di `datasets.json`[^manifest]: tema, nome breve, titolo, descrizione, licenza, schema delle colonne e uno o più file (risorse). Se il percorso di un file è relativo, il file sta in `public/data/` e viene pubblicato con il sito; se è un URL, il browser lo scarica da lì.
+Ogni dataset è una voce di `datasets.json`[^manifest]: editore, nome breve, titolo, descrizione, licenza, schema delle colonne e uno o più file (risorse). Se il percorso di un file è relativo, il file sta in `public/data/` e viene pubblicato con il sito; se è un URL, il browser lo scarica da lì.
 
 # I dataset di oggi
 
@@ -26,13 +26,13 @@ Sono quelli di esempio del template, non dati nostri.
 
 | Scheda | Titolo | File | Dove sta il file |
 |---|---|---|---|
-| `@reference/country-codes` | Country Codes | CSV | nel sito |
-| `@reference/population-2022` | World Population 2022 | CSV | nel sito |
-| `@reference/co2-emissions` | CO₂ Emissions per Capita | CSV | nel sito |
-| `@reference/country-indicators` | Country Indicators (bundle) | tre CSV | nel sito |
-| `@sales/fruit-sales` | Fruit Sales | CSV | nel sito |
-| `@sales/region-metrics` | Region Metrics | Parquet | `data.portaljs.com` |
-| `@reference/world-boundaries` | World Country Boundaries | PMTiles e GeoParquet | `data.portaljs.com` |
+| `@ondata/country-codes` | Country Codes | CSV | nel sito |
+| `@ondata/population-2022` | World Population 2022 | CSV | nel sito |
+| `@ondata/co2-emissions` | CO₂ Emissions per Capita | CSV | nel sito |
+| `@ondata/country-indicators` | Country Indicators (bundle) | tre CSV | nel sito |
+| `@ondata/fruit-sales` | Fruit Sales | CSV | nel sito |
+| `@ondata/region-metrics` | Region Metrics | Parquet | `data.portaljs.com` |
+| `@ondata/world-boundaries` | World Country Boundaries | PMTiles e GeoParquet | `data.portaljs.com` |
 
 `data.portaljs.com` è lo storage (Cloudflare R2) di Datopian, che sviluppa PortalJS. Parquet, GeoParquet e PMTiles si leggono a pezzi, con richieste HTTP parziali: il browser scarica solo le parti che servono alla query o alla zona di mappa inquadrata. Verificati il 2026-10-11 sul sito: anteprima delle tabelle, SQL su un CSV e sul Parquet remoto, mappa del mondo da PMTiles.[^prove]
 

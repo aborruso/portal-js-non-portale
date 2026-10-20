@@ -15,6 +15,7 @@
 // frequency URI). Catalog inputs (dcat.config.json): `publisher.identifier` next to the
 // usual name/homepage, and `contactPoint`.
 
+import dataThemes from './data-themes.json'
 import type { DcatCatalog } from './dcat'
 import {
   dcatApProfile,
@@ -31,23 +32,11 @@ const DCATAPIT = 'http://dati.gov.it/onto/dcatapit#'
 
 // Italian prefLabels of the EU data-theme vocabulary
 // (http://publications.europa.eu/resource/authority/data-theme), the one DCAT-AP_IT
-// mandates for dcat:theme.
+// mandates for dcat:theme; official labels from data-themes.json.
 const EU_THEME = 'http://publications.europa.eu/resource/authority/data-theme/'
-const EU_THEME_LABELS: Record<string, string> = {
-  AGRI: 'Agricoltura, pesca, silvicoltura e prodotti alimentari',
-  ECON: 'Economia e finanze',
-  EDUC: 'Istruzione, cultura e sport',
-  ENER: 'Energia',
-  ENVI: 'Ambiente',
-  GOVE: 'Governo e settore pubblico',
-  HEAL: 'Salute',
-  INTR: 'Tematiche internazionali',
-  JUST: 'Giustizia, sistema giuridico e sicurezza pubblica',
-  REGI: 'Regioni e città',
-  SOCI: 'Popolazione e società',
-  TECH: 'Scienza e tecnologia',
-  TRAN: 'Trasporti',
-}
+const EU_THEME_LABELS: Record<string, string> = Object.fromEntries(
+  Object.values(dataThemes.themes).map((th) => [th.code, (th.labels as Record<string, string>).it])
+)
 
 // A theme as skos:Concept with its prefLabel (AgID rules 167 and 169). A theme outside
 // the EU vocabulary has no known label, so it stays a plain IRI rather than an

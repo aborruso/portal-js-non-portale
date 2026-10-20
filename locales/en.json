@@ -34,6 +34,7 @@
   "dataset.eyebrow": "Dataset",
   "dataset.owner": "Owner",
   "dataset.theme": "Theme",
+  "dataset.themes": "Themes",
   "dataset.resources": "Resources",
   "dataset.files.one": "{count} file",
   "dataset.files.other": "{count} files",

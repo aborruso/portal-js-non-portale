@@ -1,6 +1,8 @@
 # Registro degli aggiornamenti del wiki
 
 ## 2026-10-12
+* **Creazione**: documentati i [temi ed editore dei dataset](portale/temi-dcat.md): temi ufficiali DCAT nella ricerca e nella scheda, namespace come editore (`ondata`).
+* **Modifica**: [dati](portale/dati.md) e [panoramica](portale/panoramica.md) con gli indirizzi `/@ondata/…`.
 * **Creazione**: documentati i [grafici dei dataset](portale/grafici.md), con il primo grafico su CO₂ Emissions per Capita.
 * **Modifica**: il tema grafico attivo diventa `italia` ([temi grafici](portale/temi.md)).
 

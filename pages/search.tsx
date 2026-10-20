@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import DebouncedInput from '../components/ui/DebouncedInput'
 import { NAMESPACE_TYPE, datasetHref, getResources, type Dataset } from '../lib/datasets'
 import { provider } from '../lib/providers'
+import { datasetThemes } from '../lib/data-themes'
 import { formatNumber, t, tn } from '../lib/i18n'
 
 export async function getStaticProps() {
@@ -56,6 +57,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
   const [query, setQuery] = useState('')
   const [activeCats, setActiveCats] = useState<Set<string>>(new Set())
   const [activeNs, setActiveNs] = useState<Set<string>>(new Set())
+  const [activeThemes, setActiveThemes] = useState<Set<string>>(new Set())
 
   // Initialize the query from ?q=… once the router is ready (the home page CTA
   // and suggested-query chips both navigate here with a ?q param).
@@ -84,11 +86,14 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
   const catOf = (d: Dataset) => d.category ?? t('search.other')
   const matchesCats = (d: Dataset) => activeCats.size === 0 || activeCats.has(catOf(d))
   const matchesNs = (d: Dataset) => activeNs.size === 0 || activeNs.has(d.namespace)
+  // A dataset can have several themes: it matches when any of them is selected.
+  const matchesThemes = (d: Dataset) =>
+    activeThemes.size === 0 || datasetThemes(d).some((th) => activeThemes.has(th))
 
   const filtered = useMemo(
-    () => searched.filter((d) => matchesCats(d) && matchesNs(d)),
+    () => searched.filter((d) => matchesCats(d) && matchesNs(d) && matchesThemes(d)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [searched, activeCats, activeNs]
+    [searched, activeCats, activeNs, activeThemes]
   )
 
   // Facet options with counts. Each group's counts are taken over the list
@@ -99,22 +104,32 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
   const catFacets = useMemo(() => {
     if (!datasets.some((d) => d.category)) return null
     const counts = new Map<string, number>()
-    for (const d of searched.filter(matchesNs))
+    for (const d of searched.filter((d) => matchesNs(d) && matchesThemes(d)))
       counts.set(catOf(d), (counts.get(catOf(d)) ?? 0) + 1)
     return Array.from(counts.entries()).sort(([a], [b]) =>
       a === t('search.other') ? 1 : b === t('search.other') ? -1 : a.localeCompare(b)
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [datasets, searched, activeNs])
+  }, [datasets, searched, activeNs, activeThemes])
 
   const nsFacets = useMemo(() => {
     if (new Set(datasets.map((d) => d.namespace)).size < 2) return null
     const counts = new Map<string, number>()
-    for (const d of searched.filter(matchesCats))
+    for (const d of searched.filter((d) => matchesCats(d) && matchesThemes(d)))
       counts.set(d.namespace, (counts.get(d.namespace) ?? 0) + 1)
     return Array.from(counts.entries()).sort(([a], [b]) => a.localeCompare(b))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [datasets, searched, activeCats])
+  }, [datasets, searched, activeCats, activeThemes])
+
+  // Themes: a dataset with several themes counts once under each.
+  const themeFacets = useMemo(() => {
+    if (!datasets.some((d) => datasetThemes(d).length > 0)) return null
+    const counts = new Map<string, number>()
+    for (const d of searched.filter((d) => matchesCats(d) && matchesNs(d)))
+      for (const th of datasetThemes(d)) counts.set(th, (counts.get(th) ?? 0) + 1)
+    return Array.from(counts.entries()).sort(([a], [b]) => a.localeCompare(b))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [datasets, searched, activeCats, activeNs])
 
   const toggle = (set: Set<string>, v: string, apply: (s: Set<string>) => void) => {
     const next = new Set(set)
@@ -123,7 +138,7 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
     apply(next)
   }
 
-  const hasFacets = Boolean(catFacets || nsFacets)
+  const hasFacets = Boolean(catFacets || nsFacets || themeFacets)
 
   return (
     <>
@@ -168,6 +183,15 @@ export default function Search({ datasets }: { datasets: Dataset[] }) {
                     active={activeCats}
                     onToggle={(v) => toggle(activeCats, v, setActiveCats)}
                     onClear={() => setActiveCats(new Set())}
+                  />
+                )}
+                {themeFacets && (
+                  <FacetGroup
+                    title={t('search.themes')}
+                    options={themeFacets}
+                    active={activeThemes}
+                    onToggle={(v) => toggle(activeThemes, v, setActiveThemes)}
+                    onClear={() => setActiveThemes(new Set())}
                   />
                 )}
                 {nsFacets && (

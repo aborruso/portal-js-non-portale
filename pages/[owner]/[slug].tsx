@@ -18,6 +18,7 @@ import { provider } from '../../lib/providers'
 import { withHistory } from '../../lib/history'
 import { formatDate } from '../../lib/format'
 import { isSimpleChart } from '../../lib/views'
+import { datasetThemes } from '../../lib/data-themes'
 import { formatNumber, t, tn } from '../../lib/i18n'
 
 // DuckDB only runs in the browser, so load the query view client-side. The chunk
@@ -259,6 +260,18 @@ export default function DatasetPage({ dataset, resources, activity }: PageProps)
           {/* Metadata sidebar. */}
           <aside className="flex h-fit flex-col gap-[18px] rounded-sm border border-ink/[0.18] p-[26px]">
             <SidebarField label={namespaceLabel} value={`@${dataset.namespace}`} />
+            {datasetThemes(dataset).length > 0 && (
+              <div>
+                <div className="mb-1.5 font-sans text-[10px] font-semibold uppercase tracking-[0.08em] text-ink/45">
+                  {t('dataset.themes')}
+                </div>
+                {datasetThemes(dataset).map((th) => (
+                  <div key={th} className="font-serif text-base font-semibold text-ink">
+                    {th}
+                  </div>
+                ))}
+              </div>
+            )}
             <SidebarField
               label={t('dataset.resources')}
               value={tn('dataset.files', resources.length)}

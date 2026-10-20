@@ -132,6 +132,8 @@ export type Dataset = {
   version?: string
   // Charts shown in the showcase Views section (lib/views.ts).
   views?: import('../views').DatasetView[]
+  // DCAT overrides (lib/metadata); `themes` are EU data-theme URIs (lib/data-themes.ts).
+  dcat?: { themes?: string[] }
 }
 
 // A discovery query against the catalog. The static provider filters in memory;
