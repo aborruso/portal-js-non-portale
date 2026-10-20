@@ -72,7 +72,7 @@ rm -rf "$tmp/portal-js-non-portale"; npx -y create-portaljs@0.7.0 "$tmp/portal-j
 4. `upstream` senza `--namespace` (resta `theme` come il template, `owner` resta modifica nostra): ok?
 5. `it.json` anche a datopian/portaljs come PR? È un contributo, non un difetto.
 6. Temi nel feed DCAT-AP_IT: upstream li scrive come URI semplici, il nostro profilo come `skos:Concept` con `skos:prefLabel` italiana. Decisione di Andrea (2026-10-20): si tiene upstream; la issue su datopian/portaljs si apre dopo la risposta di Rotundo (AgID) su quali regole applica il validatore online (167 avviso, una sola volta per catalogo; 169 errore, solo sui temi `skos:Concept` senza etichetta). Sollecito inviato il 2026-10-20 nel thread «Validatore DCAT-AP_IT: quali regole applica il servizio online»
-7. PR `it.json` su datopian/portaljs: chiesta da Datopian nella chiusura di #1666 e nella PR #1684. Da preparare senza le 9 chiavi nostre, allineata a `en.json` del loro `main` attuale
+7. PR `it.json` su datopian/portaljs: chiesta da Datopian nella chiusura di #1666 e nella PR #1684. Aperta il 2026-10-20: datopian/portaljs#1689, dal fork `aborruso/portaljs`, ramo `feat/catalog-it-locale` (solo le 166 chiavi del template, `en.json` invariato da `55f2385`)
 
 # Archivio
 
